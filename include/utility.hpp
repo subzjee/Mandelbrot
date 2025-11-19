@@ -14,7 +14,7 @@ template <std::floating_point T>
  *
  * @returns The mapped coordinate on the axis.
  */
-inline constexpr T mapIndexToBoundedAxis(std::size_t idx, std::size_t num_spaces, T start, T end) {
+constexpr T mapIndexToBoundedAxis(std::size_t idx, std::size_t num_spaces, T start, T end) {
     return start + (static_cast<T>(idx) / static_cast<T>(num_spaces - 1)) * (end - start);
 }
 
@@ -33,7 +33,7 @@ template <std::floating_point T>
  *
  * @returns The mapped position of the pixel on the complex plane.
  */
-inline constexpr std::complex<T> mapPixelToComplexPlane(std::size_t row, std::size_t col, std::size_t width, std::size_t height, T x_min, T x_max, T y_min, T y_max) {
+constexpr std::complex<T> mapPixelToComplexPlane(std::size_t row, std::size_t col, std::size_t width, std::size_t height, T x_min, T x_max, T y_min, T y_max) {
     return {
         mapIndexToBoundedAxis(col, width, x_min, x_max), // Map column onto the real axis.
         mapIndexToBoundedAxis(row, height, y_max, y_min) // Map row onto the imaginary axis.
