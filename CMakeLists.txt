@@ -32,11 +32,18 @@ function(configure_target target)
     endif()
 endfunction()
 
-add_executable(${PROJECT_NAME} src/main.cpp)
-configure_target(${PROJECT_NAME})
+set(MANDELBROT_FILES
+    src/mandelbrot_omp.cpp
+    src/mandelbrot_serial.cpp
+)
 
-target_include_directories(mandelbrot PRIVATE include ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(mandelbrot PRIVATE ${OpenCV_LIBS})
+add_library(mandelbrot_lib ${MANDELBROT_FILES})
+target_include_directories(mandelbrot_lib PUBLIC include)
+target_link_libraries(mandelbrot_lib PUBLIC ${OpenCV_LIBS})
+configure_target(mandelbrot_lib)
+
+add_executable(${PROJECT_NAME} src/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE mandelbrot_lib)
 
 if(BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)

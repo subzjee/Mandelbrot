@@ -4,7 +4,7 @@
 
 #include "mandelbrot_serial.hpp"
 
-constexpr std::size_t width = 7680, height = 4320;
+constexpr std::size_t width = 1920, height = 1080;
 constexpr int max_iterations = 500;
 constexpr double x_min = -1.252213542, x_max = -1.22213542; // The bounds of the real axis on the complex plane.
 constexpr double y_min = 0.108567708, y_max = 0.125442708; // The bounds of the imaginary axis on the complex plane.
