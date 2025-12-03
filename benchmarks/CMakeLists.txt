@@ -12,11 +12,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(benchmark)
 
 add_executable(bm_mandelbrot bm_mandelbrot.cpp)
-target_include_directories(bm_mandelbrot PRIVATE ../include)
-
+target_link_libraries(bm_mandelbrot PRIVATE mandelbrot_lib benchmark::benchmark)
 configure_target(bm_mandelbrot)
-
-target_link_libraries(bm_mandelbrot PRIVATE benchmark::benchmark)
 
 add_custom_target(run_benchmarks
     COMMAND bm_mandelbrot
