@@ -11,7 +11,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(OpenMP)
-find_package(OpenCV REQUIRED)
 
 set(WARNING_FLAGS
     -Wall -Wextra -Wpedantic -Wconversion
@@ -32,19 +31,17 @@ function(configure_target target)
     endif()
 endfunction()
 
-set(MANDELBROT_FILES
-    src/mandelbrot_omp.cpp
-    src/mandelbrot_serial.cpp
-)
-
-add_library(mandelbrot_lib ${MANDELBROT_FILES})
-target_include_directories(mandelbrot_lib PUBLIC include)
-target_link_libraries(mandelbrot_lib PUBLIC ${OpenCV_LIBS})
-configure_target(mandelbrot_lib)
-
-add_executable(${PROJECT_NAME} src/main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE mandelbrot_lib)
+add_subdirectory(src)
 
 if(BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
+
+include(GNUInstallDirs)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS mandelbrot DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES README.md LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/mandelbrot)
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/mandelbrotConfig.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mandelbrot
+)

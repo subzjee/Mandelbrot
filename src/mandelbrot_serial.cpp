@@ -1,16 +1,18 @@
 #include <complex>
+#include <vector>
 
-#include "mandelbrot_serial.hpp"
-#include "utility.hpp"
+#include "mandelbrot.hpp"
 
-void mandelbrotSerial(std::uint8_t *output, std::size_t width,
-                      std::size_t height, float x_min, float x_max, float y_min,
-                      float y_max, unsigned int max_iterations) {
+MandelbrotResult mandelbrot_serial(std::size_t width, std::size_t height,
+                             float real_min, float real_max, float imag_min,
+                             float imag_max, unsigned int max_iterations) {
+  MandelbrotResult result(height, std::vector<unsigned int>(width, 0));
+
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; ++col) {
       std::complex<float> z{0.0, 0.0};
-      std::complex<float> c = mapPixelToComplexPlane(row, col, width, height,
-                                                    x_min, x_max, y_min, y_max);
+      const std::complex<float> c = utility::mapPixelToComplexPlane(
+          row, col, width, height, real_min, real_max, imag_min, imag_max);
 
       unsigned int iteration{0};
       while (std::norm(z) <= 4.0 && iteration < max_iterations) {
@@ -19,8 +21,9 @@ void mandelbrotSerial(std::uint8_t *output, std::size_t width,
         ++iteration;
       }
 
-      output[row * width + col] = static_cast<uint8_t>(
-          255.0 * static_cast<float>(iteration) / max_iterations);
+      result[row][col] = iteration;
     }
   }
+
+  return result;
 }

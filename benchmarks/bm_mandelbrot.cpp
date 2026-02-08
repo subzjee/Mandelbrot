@@ -1,41 +1,50 @@
 #include <vector>
 
 #include "benchmark/benchmark.h"
-#include "mandelbrot_serial.hpp"
-#include "mandelbrot_omp.hpp"
 
-constexpr float REAL_MIN = -2.0f, REAL_MAX = 1.0f;
-constexpr float IMAG_MIN = -1.0f, IMAG_MAX =  1.0f;
-constexpr unsigned int MAX_ITER = 1000;
+#include "mandelbrot.hpp"
+#include "utility.hpp"
 
-template <auto Func>
-inline void BM_Mandelbrot(benchmark::State& state) {
-    const auto width  = state.range(0);
-    const auto height = state.range(1);
+constexpr float real_min = -2.0f, real_max = 1.0f;
+constexpr float imag_min = -1.0f, imag_max = 1.0f;
+constexpr unsigned int max_iter = 1000;
 
-    std::vector<uint8_t> output(width * height * 3);
+template <auto Func> void BM_Mandelbrot(benchmark::State& state) {
+  if (Func == mandelbrot_avx2 && !__builtin_cpu_supports("avx2")) {
+      state.SkipWithError("AVX2 not supported on this CPU");
+      return;
+  }
 
-    for (auto _ : state) {
-        Func(output.data(), width, height,
-             REAL_MIN, REAL_MAX,
-             IMAG_MIN, IMAG_MAX,
-             MAX_ITER);
-    }
+  const auto width = state.range(0);
+  const auto height = state.range(1);
+
+  std::vector<uint8_t> output(width * height * 3);
+
+  for (auto _ : state) {
+    MandelbrotResult result = Func(width, height, real_min, real_max, imag_min, imag_max,
+         max_iter);
+    benchmark::DoNotOptimize(result);
+  }
 }
 
-#define COMMON_ARGS \
-    ->Args({640, 480}) \
-    ->Args({1280, 720}) \
-    ->Args({1920, 1080}) \
-    ->Args({3840, 2160}) \
-    ->UseRealTime()
+#define COMMON_ARGS                                                            \
+  ->Args({640, 480})                                                           \
+      ->Args({1280, 720})                                                      \
+      ->Args({1920, 1080})                                                     \
+      ->Args({3840, 2160})                                                     \
+      ->UseRealTime()
 
-#define MANDEL_BENCH(NAME, FUNC) \
-    BENCHMARK(BM_Mandelbrot<FUNC>) \
-        ->Name(NAME) \
-        COMMON_ARGS;
+#define MANDEL_BENCH(NAME, FUNC)                                               \
+  BENCHMARK(BM_Mandelbrot<FUNC>)->Name(NAME) COMMON_ARGS;
 
-MANDEL_BENCH("Serial", mandelbrotSerial)
-MANDEL_BENCH("OMP",    mandelbrotOMP)
+MANDEL_BENCH("Serial", mandelbrot_serial)
+
+#if defined(_OPENMP)
+MANDEL_BENCH("OMP", mandelbrot_omp)
+#endif
+
+#if defined(__AVX2__)
+MANDEL_BENCH("AVX2", mandelbrot_avx2)
+#endif
 
 BENCHMARK_MAIN();
