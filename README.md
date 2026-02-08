@@ -1,0 +1,126 @@
+# **Mandelbrot**
+A Mandelbrot set library in C++17 featuring optional OpenMP and AVX2 support. It uses the escape-time algorithm to obtain the iteration count.
+
+---
+
+## Motivation
+
+The Mandelbrot set has fascinated me for two reasons:
+1. Emergent behavior: Simple iterative rules giving rise to complex patterns is beautiful.
+2. Potential for beautiful visualizations: Apart from the mathematical beauty of the Mandelbrot set, it allows for endless visualization strategies that produce stunning and colorful images.
+
+---
+
+## Features
+* Serial implementation - a simple and portable fallback.
+* OpenMP implementation - enables multicore acceleration.
+* AVX2 implementation - enables vectorization for CPUs that support AVX2.
+* Works with CMake and is installable as a library.
+
+---
+
+## Requirements
+* A C++17 compiler
+* CMake 3.31+ for ease-of-building
+* Optional:
+  * A compiler supporting OpenMP to enable the OpenMP implementation.
+  * AVX2-capable CPU to enable the AVX2 implementation.
+
+---
+
+## Building the library
+```bash
+git clone https://github.com/subzjee/Mandelbrot
+cd Mandelbrot
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+### Installing the library
+Once the library has been built, you can install the library using the following:
+```bash
+sudo cmake --install build
+```
+This will install the library to the default system locations. If you wish to install it to a custom location, you can use the `CMAKE_INSTALL_PREFIX` variable:
+```bash
+sudo cmake --install build --prefix /path/to/install
+```
+
+### Benchmarks
+This project includes benchmarks making use of Google Benchmark. These benchmarks can be found in the `benchmarks/` directory.
+
+To build the benchmarks, add `-DBUILD_BENCHMARKS=ON` while building the library.\
+There is a custom target (`run_benchmarks`) to run the benchmarks after building.
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_BENCHMARKS=ON
+cmake --build build --target run_benchmarks
+```
+
+Alternatively, you can run the benchmarks manually:
+```bash
+./build/benchmarks/bm_mandelbrot
+```
+
+---
+
+## Using the library
+
+Once the library has been installed, it can be used in a CMake-based project by using `find_package`.
+```cmake
+find_package(mandelbrot REQUIRED)
+target_link_libraries(<your_project> PRIVATE mandelbrot::mandelbrot)
+```
+
+Then, you can include the header and use the library as shown below:
+
+```cpp
+#include "mandelbrot.hpp"
+
+int main() {
+  MandelbrotResult iterations = mandelbrot_serial(1920, 1080, -2.0f, 1.0f, -1.0f, 1.0f, 1000);
+  return 0;
+}
+```
+
+This example uses the serial implementation to generate the Mandelbrot set for a 1920x1080 image. The complex plane is bounded by [-2.0, 1.0] for the real axis and [-1.0, 1.0] for the imaginary axis, with a maximum of 1000 iterations per pixel.
+
+---
+
+## Project Structure
+
+```bash
+.
+├── benchmarks
+│   ├── bm_mandelbrot.cpp           # Benchmarks
+│   └── CMakeLists.txt
+├── cmake
+│   └── mandelbrotConfig.cmake      # Config for `find_package`
+├── CMakeLists.txt                  # Root CMake file
+├── include           
+│   ├── mandelbrot.hpp              # Main functions
+│   └── utility.hpp                 # Helper functions
+├── LICENSE
+├── README.md
+└── src
+    ├── CMakeLists.txt
+    ├── mandelbrot_avx2.cpp         # AVX2 implementation
+    ├── mandelbrot_omp.cpp          # OpenMP implementation
+    ├── mandelbrot_serial.cpp       # Serial implementation
+    └── utility.cpp                 # Helper functions
+```
+
+---
+
+## Future work
+* Runtime dispatch to select the best implementation.
+* Visualization examples.
+* CUDA/HIP support for GPU acceleration.
+* AVX512 support for even wider vectorization.
+
+---
+
+## Notes
+
+* All implementations other than the serial implementation have been guarded by their appropriate compile-time checks.
+* Runtime checks are ran for implementations depending on specific CPU support, such as the AVX2 implementation. This is to prevent crashing due to unsupported instructions if the compiler has been set to still generate those instructions.
