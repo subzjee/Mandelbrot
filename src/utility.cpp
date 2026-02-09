@@ -19,7 +19,7 @@ __m256 avx::mapColumnsToRealAxis(std::size_t col, std::size_t width,
 
   float real_scale = (real_max - real_min) / (static_cast<float>(width - 1));
 
-  __m256 reals = _mm256_add_ps(_mm256_mul_ps(col_indices, _mm256_set1_ps(real_scale)), _mm256_set1_ps(real_min));
+  __m256 reals = _mm256_fmadd_ps(col_indices, _mm256_set1_ps(real_scale), _mm256_set1_ps(real_min));
 
   return reals;
 }
