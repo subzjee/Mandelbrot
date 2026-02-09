@@ -19,7 +19,7 @@ constexpr float real_min = -1.252213542, real_max = -1.22213542; // The bounds o
 constexpr float imag_min = 0.108567708, imag_max = 0.125442708; // The bounds of the imaginary axis on the complex plane.
 
 int main() {
-  MandelbrotResult iterations = mandelbrot_avx2_omp(width, height, real_min, real_max, imag_min, imag_max, max_iterations);
+  MandelbrotResult iterations = mandelbrot_serial(width, height, real_min, real_max, imag_min, imag_max, max_iterations);
 
   // Setup the image.
   cv::Mat pixels(height, width, CV_8UC1);
