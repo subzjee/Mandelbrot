@@ -30,8 +30,6 @@ template <auto Func> void BM_Mandelbrot(benchmark::State& state) {
   const auto width = state.range(0);
   const auto height = state.range(1);
 
-  std::vector<uint8_t> output(width * height * 3);
-
   for (auto _ : state) {
     MandelbrotResult result =
         Func(width, height, real_min, real_max, imag_min, imag_max, max_iter);
@@ -39,6 +37,7 @@ template <auto Func> void BM_Mandelbrot(benchmark::State& state) {
   }
 }
 
+// Set benchmark image resolutions.
 #define COMMON_ARGS                                                            \
   ->Args({640, 480})                                                           \
       ->Args({1280, 720})                                                      \
