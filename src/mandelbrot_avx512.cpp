@@ -1,3 +1,10 @@
+/*
+ * This file contains the AVX512 implementation of the algorithm.
+ *
+ * Note: The implementation will fallback to the serial implementation, in case
+ * that the current CPU does not support AVX512 instructions.
+ */
+
 #if defined(__AVX512F__)
 
 #include <iostream>

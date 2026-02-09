@@ -1,3 +1,7 @@
+/*
+ * This file contains the declarations for the utility functions.
+ */
+
 #pragma once
 
 #include <complex>

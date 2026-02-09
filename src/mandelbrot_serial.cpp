@@ -1,3 +1,7 @@
+/*
+ * This file contains the serial implementation of the algorithm.
+ */
+
 #include <complex>
 #include <vector>
 

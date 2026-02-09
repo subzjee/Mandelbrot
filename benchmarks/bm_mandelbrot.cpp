@@ -1,3 +1,12 @@
+/*
+ * This file contains the benchmarks for the various implementations.
+ *
+ * The benchmarks included are: serial, AVX2, AVX512 and then the combination for each
+ * with OpenMP.
+ *
+ * Benchmarks may be skipped depending on the runtime capability of the CPU.
+ */
+
 #include <vector>
 
 #include "benchmark/benchmark.h"

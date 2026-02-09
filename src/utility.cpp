@@ -1,3 +1,7 @@
+/*
+ * This file contains the implementations for the utility functions.
+ */
+
 #include "utility.hpp"
 
 using namespace utility;

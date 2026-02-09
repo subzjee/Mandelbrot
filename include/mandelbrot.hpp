@@ -1,3 +1,7 @@
+/*
+ * This file contains the declarations for the various Mandelbrot functions.
+ */
+
 #pragma once
 #include "utility.hpp"
 

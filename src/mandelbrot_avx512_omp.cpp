@@ -1,3 +1,10 @@
+/*
+ * This file contains the AVX512 + OpenMP implementation of the algorithm.
+ *
+ * Note: The implementation will fallback to the OpenMP implementation, in case
+ * that the current CPU does not support AVX2 instructions.
+ */
+
 #if defined(__AVX512F__)
 
 #include <iostream>

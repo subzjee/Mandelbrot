@@ -1,3 +1,7 @@
+/*
+ * This file contains the OpenMP implementation of the algorithm.
+ */
+
 #if defined(_OPENMP)
 
 #include <complex>

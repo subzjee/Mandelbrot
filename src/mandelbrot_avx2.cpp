@@ -1,3 +1,10 @@
+/*
+ * This file contains the AVX2 implementation of the algorithm.
+ *
+ * Note: The implementation will fallback to the serial implementation, in case
+ * that the current CPU does not support AVX2 instructions.
+ */
+
 #if defined(__AVX2__)
 
 #include <iostream>
