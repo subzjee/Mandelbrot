@@ -26,9 +26,9 @@ int main() {
 
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; ++col) {
-      unsigned int iterations = iterations[row][col];
+      unsigned int iteration = iterations[row][col];
       // The OpenCV material format uses unsigned 8-bit single-channel colors. Therefore, we convert it to `uint8_t`.
-      pixels.data[row * width + col] = static_cast<uint8_t>(255.0f * static_cast<float>(iterations) / max_iterations);
+      pixels.data[row * width + col] = static_cast<uint8_t>(255.0f * static_cast<float>(iteration) / max_iterations);
     }
   }
 
