@@ -1,5 +1,5 @@
 # **Mandelbrot**
-A Mandelbrot set library in C++17 featuring optional OpenMP and AVX2 support. It uses the escape-time algorithm to obtain the iteration count.
+A Mandelbrot set library in C++17 featuring optional OpenMP and AVX2/AVX512 support. It uses the escape-time algorithm to obtain the iteration count.
 
 ---
 
