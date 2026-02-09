@@ -82,7 +82,7 @@ Then, you can include the header and use the library as shown below:
 int main() {
   MandelbrotResult iterations = mandelbrot_serial(1920, 1080, -2.0f, 1.0f, -1.0f, 1.0f, 1000);
   
-  # Print the iteration count for each pixel.
+  // Print the iteration count for each pixel.
   for (std::size_t row = 0; row < iterations.size(); ++row) {
     for (std::size_t col = 0; col < iterations[row]; ++col) {
       std::cout << iterations[row][col] << '\n';
