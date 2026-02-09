@@ -12,9 +12,9 @@ The Mandelbrot set has fascinated me for two reasons:
 ---
 
 ## Features
-* Serial implementation - a simple and portable fallback.
-* OpenMP implementation - enables multicore acceleration.
-* AVX2 implementation - enables vectorization for CPUs that support AVX2.
+* Serial implementation for a simple and portable fallback.
+* Parallel processing with OpenMP for multicore acceleration.
+* Vectorization support with AVX2 for AVX2-capable CPUs.
 * Works with CMake and is installable as a library.
 
 ---
