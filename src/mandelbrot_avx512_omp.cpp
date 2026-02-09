@@ -12,9 +12,9 @@ MandelbrotResult mandelbrot_avx512_omp(std::size_t width, std::size_t height,
                                    float imag_min, float imag_max,
                                    unsigned int max_iterations) {
   if (!__builtin_cpu_supports("avx512f")) {
-    std::cerr << "AVX512F not supported on this CPU. Falling back to serial "
+    std::cerr << "AVX512F not supported on this CPU. Falling back to OpenMP "
                  "version.\n";
-    return mandelbrot_serial(width, height, real_min, real_max, imag_min,
+    return mandelbrot_omp(width, height, real_min, real_max, imag_min,
                              imag_max, max_iterations);
   }
 
