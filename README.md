@@ -20,11 +20,11 @@ The Mandelbrot set has fascinated me for two reasons:
 ---
 
 ## Requirements
-* A C++17 compiler
-* CMake 3.31+ for ease-of-building
+* Clang/GCC with C++17 support.
+* CMake 3.31+ for ease-of-building.
 * Optional:
   * A compiler supporting OpenMP to enable the OpenMP implementation.
-  * AVX2-capable CPU to enable the AVX2 implementation.
+  * AVX2-capable CPU to use the AVX2 implementation.
 
 ---
 
@@ -139,10 +139,11 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 * Visualization examples.
 * CUDA/HIP support for GPU acceleration.
 * AVX512 support for even wider vectorization.
+* MSVC support.
 
 ---
 
 ## Notes
 
 * All implementations other than the serial implementation have been guarded by their appropriate compile-time checks.
-* Runtime checks are ran for implementations depending on specific CPU support, such as the AVX2 implementation. This is to prevent crashing due to unsupported instructions if the compiler has been set to still generate those instructions.
+* Runtime checks are ran for implementations depending on specific CPU support, such as the AVX2 implementation. It will fallback to the serial implementation. This is to prevent crashing due to unsupported instructions if the compiler has been set to still generate those instructions.
