@@ -47,4 +47,8 @@ MANDEL_BENCH("OMP", mandelbrot_omp)
 MANDEL_BENCH("AVX2", mandelbrot_avx2)
 #endif
 
+#if defined(__AVX2__) && defined(_OPENMP)
+MANDEL_BENCH("AVX2_OMP", mandelbrot_avx2_omp)
+#endif
+
 BENCHMARK_MAIN();

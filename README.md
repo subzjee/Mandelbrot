@@ -47,7 +47,7 @@ sudo cmake --install build --prefix /path/to/install
 ```
 
 ### Benchmarks
-This project includes benchmarks making use of Google Benchmark. These benchmarks can be found in the `benchmarks/` directory.
+This project includes benchmarks making use of Google Benchmark. These benchmarks can be found in the `benchmarks` directory.
 
 To build the benchmarks, add `-DBUILD_BENCHMARKS=ON` while building the library.\
 There is a custom target (`run_benchmarks`) to run the benchmarks after building.
@@ -75,15 +75,32 @@ target_link_libraries(<your_project> PRIVATE mandelbrot::mandelbrot)
 Then, you can include the header and use the library as shown below:
 
 ```cpp
+#include <iostream>
+
 #include "mandelbrot.hpp"
 
 int main() {
   MandelbrotResult iterations = mandelbrot_serial(1920, 1080, -2.0f, 1.0f, -1.0f, 1.0f, 1000);
+  
+  # Print the iteration count for each pixel.
+  for (std::size_t row = 0; row < iterations.size(); ++row) {
+    for (std::size_t col = 0; col < iterations[row]; ++col) {
+      std::cout << iterations[row][col] << '\n';
+    }
+  }
   return 0;
 }
 ```
 
 This example uses the serial implementation to generate the Mandelbrot set for a 1920x1080 image. The complex plane is bounded by [-2.0, 1.0] for the real axis and [-1.0, 1.0] for the imaginary axis, with a maximum of 1000 iterations per pixel.
+
+For more examples, which export it to an actual image, check out the `examples` directory.
+To build the examples, add `-DBUILD_EXAMPLES=ON` while building the library.
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
+./build/examples/greyscale
+```
 
 ---
 
@@ -97,6 +114,9 @@ This example uses the serial implementation to generate the Mandelbrot set for a
 ├── cmake
 │   └── mandelbrotConfig.cmake      # Config for `find_package`
 ├── CMakeLists.txt                  # Root CMake file
+├── examples
+│   ├── CMakeLists.txt
+│   └── greyscale.cpp               # Export as greyscale example
 ├── include           
 │   ├── mandelbrot.hpp              # Main functions
 │   └── utility.hpp                 # Helper functions
@@ -105,6 +125,7 @@ This example uses the serial implementation to generate the Mandelbrot set for a
 └── src
     ├── CMakeLists.txt
     ├── mandelbrot_avx2.cpp         # AVX2 implementation
+    ├── mandelbrot_avx2_omp.cpp     # AVX2 + OpenMP implementation 
     ├── mandelbrot_omp.cpp          # OpenMP implementation
     ├── mandelbrot_serial.cpp       # Serial implementation
     └── utility.cpp                 # Helper functions

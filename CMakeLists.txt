@@ -4,6 +4,7 @@ project(mandelbrot LANGUAGES CXX)
 
 option(BUILD_BENCHMARKS "Build Google Benchmark tests" OFF)
 option(USE_FAST_MATH "Use ffast-math compiler option" ON)
+option(BUILD_EXAMPLES "Build examples" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -35,6 +36,10 @@ add_subdirectory(src)
 
 if(BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
+endif()
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 include(GNUInstallDirs)

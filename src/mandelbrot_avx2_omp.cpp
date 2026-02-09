@@ -1,17 +1,18 @@
-#if defined(__AVX2__)
+#if defined(__AVX2__) && defined(_OPENMP)
 
 #include <immintrin.h>
 
 #include "mandelbrot.hpp"
 #include "utility.hpp"
 
-MandelbrotResult mandelbrot_avx2(std::size_t width, std::size_t height,
+MandelbrotResult mandelbrot_avx2_omp(std::size_t width, std::size_t height,
                            float real_min, float real_max, float imag_min,
                            float imag_max, unsigned int max_iterations) {
   constexpr std::size_t lanes = utility::avx::simd_width_bytes / sizeof(float);
 
   MandelbrotResult result(height, std::vector<unsigned int>(width, 0));
 
+  #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; col += lanes) {
       const auto [c_real, c_imag] = utility::avx::mapPixelsToComplexPlane(
