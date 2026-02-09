@@ -33,7 +33,7 @@ int main() {
   }
 
   // Save the image.
-  cv::imwrite("greyscale_avx2_omp.png", pixels);
+  cv::imwrite("greyscale.png", pixels);
 
   return 0;
 }

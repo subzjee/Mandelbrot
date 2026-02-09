@@ -103,6 +103,8 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 ./build/examples/greyscale
 ```
 
+![Greyscale example of the Mandelbrot set](/examples/greyscale.png)
+
 ---
 
 ## Project Structure
