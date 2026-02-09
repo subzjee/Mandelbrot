@@ -9,8 +9,8 @@ MandelbrotResult mandelbrot_avx2_omp(std::size_t width, std::size_t height,
                            float real_min, float real_max, float imag_min,
                            float imag_max, unsigned int max_iterations) {
   if (!__builtin_cpu_supports("avx2")) {
-    std::cerr << "AVX2 not supported on this CPU. Falling back to serial version." << std::endl;
-    return mandelbrot_serial(width, height, real_min, real_max, imag_min, imag_max, max_iterations);
+    std::cerr << "AVX2 not supported on this CPU. Falling back to OpenMP version." << std::endl;
+    return mandelbrot_omp(width, height, real_min, real_max, imag_min, imag_max, max_iterations);
   }
 
   constexpr std::size_t lanes = utility::avx::simd_width_bytes / sizeof(float);
