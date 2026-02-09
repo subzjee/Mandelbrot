@@ -1,5 +1,7 @@
 #if defined(__AVX2__)
 
+#include <iostream>
+
 #include <immintrin.h>
 
 #include "mandelbrot.hpp"
@@ -9,7 +11,7 @@ MandelbrotResult mandelbrot_avx2(std::size_t width, std::size_t height,
                            float real_min, float real_max, float imag_min,
                            float imag_max, unsigned int max_iterations) {
   if (!__builtin_cpu_supports("avx2")) {
-    std::cerr << "AVX2 not supported on this CPU. Falling back to serial version." << std::endl;
+    std::cerr << "AVX2 not supported on this CPU. Falling back to serial version.\n";
     return mandelbrot_serial(width, height, real_min, real_max, imag_min, imag_max, max_iterations);
   }
 
