@@ -1,11 +1,22 @@
+/*
+ * This example will build a greyscale 1920x1080 image of the Mandelbrot set
+ * for the complex plane bounded by [-1.252213542, -1.22213542] on the real axis
+ * and [0.108567708, 0.125442708] on the imaginary axis.
+ * The maximum iterations for each pixel is set to 1000.
+ *
+ * Note: The classic example of a greyscale Mandelbrot visualization colors non-escaped pixels black.
+ * This example inverts that by making them white. I found it to be easier to discern details using
+ * this color scheme.
+ */
+
 #include <opencv2/opencv.hpp>
 
 #include "mandelbrot.hpp"
 
 constexpr std::size_t width = 1920, height = 1080;
 constexpr int max_iterations = 1000;
-constexpr double real_min = -1.252213542, real_max = -1.22213542; // The bounds of the real axis on the complex plane.
-constexpr double imag_min = 0.108567708, imag_max = 0.125442708; // The bounds of the imaginary axis on the complex plane.
+constexpr float real_min = -1.252213542, real_max = -1.22213542; // The bounds of the real axis on the complex plane.
+constexpr float imag_min = 0.108567708, imag_max = 0.125442708; // The bounds of the imaginary axis on the complex plane.
 
 int main() {
   MandelbrotResult iterations = mandelbrot_avx2_omp(width, height, real_min, real_max, imag_min, imag_max, max_iterations);
