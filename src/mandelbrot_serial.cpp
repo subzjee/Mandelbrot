@@ -4,8 +4,9 @@
 #include "mandelbrot.hpp"
 
 MandelbrotResult mandelbrot_serial(std::size_t width, std::size_t height,
-                             float real_min, float real_max, float imag_min,
-                             float imag_max, unsigned int max_iterations) {
+                                   float real_min, float real_max,
+                                   float imag_min, float imag_max,
+                                   unsigned int max_iterations) {
   MandelbrotResult result(height, std::vector<unsigned int>(width, 0));
 
   for (std::size_t row = 0; row < height; ++row) {

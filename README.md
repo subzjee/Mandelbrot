@@ -14,7 +14,7 @@ The Mandelbrot set has fascinated me for two reasons:
 ## Features
 * Serial implementation for a simple and portable fallback.
 * Parallel processing with OpenMP for multicore acceleration.
-* Vectorization support with AVX2 for AVX2-capable CPUs.
+* Vectorization support with AVX2/AVX512 for capable CPUs.
 * Works with CMake and is installable as a library.
 
 ---
@@ -23,8 +23,9 @@ The Mandelbrot set has fascinated me for two reasons:
 * Clang/GCC with C++17 support.
 * CMake 3.31+ for ease-of-building.
 * Optional:
-  * A compiler supporting OpenMP to enable the OpenMP implementation.
-  * AVX2-capable CPU to use the AVX2 implementation.
+  * A compiler supporting OpenMP to enable the OpenMP implementations.
+  * AVX2-capable CPU to use the AVX2 implementations.
+  * AVX512-capable CPU to use the AVX512 implementations.
 
 ---
 
@@ -128,7 +129,9 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 └── src
     ├── CMakeLists.txt
     ├── mandelbrot_avx2.cpp         # AVX2 implementation
-    ├── mandelbrot_avx2_omp.cpp     # AVX2 + OpenMP implementation 
+    ├── mandelbrot_avx2_omp.cpp     # AVX2 + OpenMP implementation
+    ├── mandelbrot_avx512.cpp       # AVX512 implementation 
+    ├── mandelbrot_avx512_omp.cpp   # AVX512 + OpenMP implementation 
     ├── mandelbrot_omp.cpp          # OpenMP implementation
     ├── mandelbrot_serial.cpp       # Serial implementation
     └── utility.cpp                 # Helper functions
@@ -140,7 +143,6 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 * Runtime dispatch to select the best implementation.
 * Visualization examples.
 * CUDA/HIP support for GPU acceleration.
-* AVX512 support for even wider vectorization.
 * MSVC support.
 
 ---
@@ -148,4 +150,4 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 ## Notes
 
 * All implementations other than the serial implementation have been guarded by their appropriate compile-time checks.
-* Runtime checks are ran for implementations depending on specific CPU support, such as the AVX2 implementation. It will fallback to the serial implementation. This is to prevent crashing due to unsupported instructions if the compiler has been set to still generate those instructions.
+* Runtime checks are ran for implementations depending on specific CPU support, such as the AVX2 implementations. It will fallback to the serial implementation. This is to prevent crashing due to unsupported instructions if the compiler has been set to still generate those instructions.

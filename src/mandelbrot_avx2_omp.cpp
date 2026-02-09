@@ -8,18 +8,21 @@
 #include "utility.hpp"
 
 MandelbrotResult mandelbrot_avx2_omp(std::size_t width, std::size_t height,
-                           float real_min, float real_max, float imag_min,
-                           float imag_max, unsigned int max_iterations) {
+                                     float real_min, float real_max,
+                                     float imag_min, float imag_max,
+                                     unsigned int max_iterations) {
   if (!__builtin_cpu_supports("avx2")) {
-    std::cerr << "AVX2 not supported on this CPU. Falling back to OpenMP version.\n";
-    return mandelbrot_omp(width, height, real_min, real_max, imag_min, imag_max, max_iterations);
+    std::cerr
+        << "AVX2 not supported on this CPU. Falling back to OpenMP version.\n";
+    return mandelbrot_omp(width, height, real_min, real_max, imag_min, imag_max,
+                          max_iterations);
   }
 
   constexpr std::size_t lanes = utility::avx::simd_width_bytes / sizeof(float);
 
   MandelbrotResult result(height, std::vector<unsigned int>(width, 0));
 
-  #pragma omp parallel for collapse(2) schedule(guided)
+#pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; col += lanes) {
       const auto [c_real, c_imag] = utility::avx::mapPixelsToComplexPlane(
@@ -41,8 +44,7 @@ MandelbrotResult mandelbrot_avx2_omp(std::size_t width, std::size_t height,
           break;
         }
 
-        __m256i iter_inc =
-            _mm256_castps_si256(active);
+        __m256i iter_inc = _mm256_castps_si256(active);
 
         // Only update the iteration count for active pixels.
         iter_counts = _mm256_add_epi32(

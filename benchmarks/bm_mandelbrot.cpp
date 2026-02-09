@@ -11,8 +11,11 @@ constexpr unsigned int max_iter = 1000;
 
 template <auto Func> void BM_Mandelbrot(benchmark::State& state) {
   if (Func == mandelbrot_avx2 && !__builtin_cpu_supports("avx2")) {
-      state.SkipWithError("AVX2 not supported on this CPU");
-      return;
+    state.SkipWithError("AVX2 not supported on this CPU");
+    return;
+  } else if (Func == mandelbrot_avx512 && !__builtin_cpu_supports("avx512f")) {
+    state.SkipWithError("AVX512F not supported on this CPU");
+    return;
   }
 
   const auto width = state.range(0);
@@ -21,8 +24,8 @@ template <auto Func> void BM_Mandelbrot(benchmark::State& state) {
   std::vector<uint8_t> output(width * height * 3);
 
   for (auto _ : state) {
-    MandelbrotResult result = Func(width, height, real_min, real_max, imag_min, imag_max,
-         max_iter);
+    MandelbrotResult result =
+        Func(width, height, real_min, real_max, imag_min, imag_max, max_iter);
     benchmark::DoNotOptimize(result);
   }
 }
@@ -49,6 +52,14 @@ MANDEL_BENCH("AVX2", mandelbrot_avx2)
 
 #if defined(__AVX2__) && defined(_OPENMP)
 MANDEL_BENCH("AVX2_OMP", mandelbrot_avx2_omp)
+#endif
+
+#if defined(__AVX512F__)
+MANDEL_BENCH("AVX512", mandelbrot_avx512)
+#endif
+
+#if defined(__AVX512F__) && defined(_OPENMP)
+MANDEL_BENCH("AVX512_OMP", mandelbrot_avx512_omp)
 #endif
 
 BENCHMARK_MAIN();
