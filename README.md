@@ -96,6 +96,7 @@ This example uses the serial implementation to generate the Mandelbrot set for a
 
 For more examples, which export it to an actual image, check out the `examples` directory.
 To build the examples, add `-DBUILD_EXAMPLES=ON` while building the library.
+For ease-of-use, the examples do require OpenCV to be installed.
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
