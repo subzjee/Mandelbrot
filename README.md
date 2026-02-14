@@ -85,7 +85,7 @@ int main() {
   
   // Print the iteration count for each pixel.
   for (std::size_t row = 0; row < iterations.size(); ++row) {
-    for (std::size_t col = 0; col < iterations[row]; ++col) {
+    for (std::size_t col = 0; col < iterations[row].size(); ++col) {
       std::cout << iterations[row][col] << '\n';
     }
   }
@@ -142,7 +142,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 ## Future work
 * Runtime dispatch to select the best implementation.
 * Visualization examples.
-* CUDA/HIP support for GPU acceleration.
+* CUDA/HIP/SYCL support for GPU acceleration.
 * MSVC support.
 
 ---
