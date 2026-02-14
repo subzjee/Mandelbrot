@@ -14,10 +14,11 @@
 #include "mandelbrot.hpp"
 #include "utility.hpp"
 
-MandelbrotResult mandelbrot_avx2_omp(std::size_t width, std::size_t height,
-                                     float real_min, float real_max,
-                                     float imag_min, float imag_max,
-                                     unsigned int max_iterations) {
+MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
+                                     const std::size_t height,
+                                     const float real_min, const float real_max,
+                                     const float imag_min, const float imag_max,
+                                     const unsigned int max_iterations) {
   if (!__builtin_cpu_supports("avx2")) {
     std::cerr
         << "AVX2 not supported on this CPU. Falling back to OpenMP version.\n";
@@ -41,30 +42,31 @@ MandelbrotResult mandelbrot_avx2_omp(std::size_t width, std::size_t height,
       __m256i iter_counts = _mm256_setzero_si256();
 
       for (unsigned int i = 0; i < max_iterations; ++i) {
-        __m256 norm = utility::avx::norm(z_real, z_imag);
+        const __m256 norm = utility::avx::norm(z_real, z_imag);
 
         // Check which pixels have not escaped yet.
-        __m256 active = _mm256_cmp_ps(norm, _mm256_set1_ps(4.0f), _CMP_LE_OS);
+        const __m256 active =
+            _mm256_cmp_ps(norm, _mm256_set1_ps(4.0f), _CMP_LE_OS);
 
         // If all pixels have escaped, stop early.
         if (_mm256_movemask_ps(active) == 0) {
           break;
         }
 
-        __m256i iter_inc = _mm256_castps_si256(active);
+        const __m256i iter_inc = _mm256_castps_si256(active);
 
         // Only update the iteration count for active pixels.
         iter_counts = _mm256_add_epi32(
             iter_counts, _mm256_and_si256(iter_inc, _mm256_set1_epi32(1)));
 
         // Calculate the new real parts.
-        __m256 z_real_new =
+        const __m256 z_real_new =
             _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(z_real, z_real),
                                         _mm256_mul_ps(z_imag, z_imag)),
                           c_real);
 
         // Calculate the new imaginary parts.
-        __m256 z_imag_new =
+        const __m256 z_imag_new =
             _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(z_real, z_imag),
                                         _mm256_mul_ps(z_real, z_imag)),
                           c_imag);

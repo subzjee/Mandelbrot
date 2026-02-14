@@ -26,8 +26,9 @@ namespace {
  *
  * @returns The mapped coordinate on the axis.
  */
-constexpr float mapIndexToBoundedAxis(std::size_t idx, std::size_t num_spaces,
-                                      float start, float end) {
+constexpr float mapIndexToBoundedAxis(const std::size_t idx,
+                                      const std::size_t num_spaces,
+                                      const float start, const float end) {
   return start +
          (static_cast<float>(idx) / static_cast<float>(num_spaces - 1)) *
              (end - start);
@@ -49,9 +50,10 @@ constexpr float mapIndexToBoundedAxis(std::size_t idx, std::size_t num_spaces,
  * @returns The mapped position of the pixel on the complex plane.
  */
 constexpr std::complex<float>
-mapPixelToComplexPlane(std::size_t row, std::size_t col, std::size_t width,
-                       std::size_t height, float real_min, float real_max,
-                       float imag_min, float imag_max) {
+mapPixelToComplexPlane(const std::size_t row, const std::size_t col,
+                       const std::size_t width, const std::size_t height,
+                       const float real_min, const float real_max,
+                       const float imag_min, const float imag_max) {
   return {
       mapIndexToBoundedAxis(col, width, real_min, real_max), // Real axis
       mapIndexToBoundedAxis(row, height, imag_max, imag_min) // Imag axis
@@ -75,8 +77,8 @@ constexpr unsigned int simd_width_bytes = simd_width / 8;
  *
  * @returns The real coordinates.
  */
-__m256 mapColumnsToRealAxis(std::size_t col, std::size_t width, float real_min,
-                            float real_max);
+__m256 mapColumnsToRealAxis(const std::size_t col, const std::size_t width,
+                            const float real_min, const float real_max);
 
 /*
  * Map the row of eight consecutive pixels in the same row to the imaginary
@@ -92,8 +94,8 @@ __m256 mapColumnsToRealAxis(std::size_t col, std::size_t width, float real_min,
  *
  * @returns The imaginary coordinates.
  */
-__m256 mapRowToImagAxis(std::size_t row, std::size_t height, float imag_min,
-                        float imag_max);
+__m256 mapRowToImagAxis(const std::size_t row, const std::size_t height,
+                        const float imag_min, const float imag_max);
 
 /*
  * Map eight consecutive pixels in the same row onto the complex plane.
@@ -110,9 +112,10 @@ __m256 mapRowToImagAxis(std::size_t row, std::size_t height, float imag_min,
  * @returns The mapped positions of the pixels on the complex plane.
  */
 std::pair<__m256, __m256>
-mapPixelsToComplexPlane(std::size_t row, std::size_t col, std::size_t width,
-                        std::size_t height, float real_min, float real_max,
-                        float imag_min, float imag_max);
+mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
+                        const std::size_t width, const std::size_t height,
+                        const float real_min, const float real_max,
+                        const float imag_min, const float imag_max);
 
 /*
  * Calculate the norms of multiple complex numbers where the real and imaginary
@@ -125,7 +128,7 @@ mapPixelsToComplexPlane(std::size_t row, std::size_t col, std::size_t width,
  *
  * @returns The norms.
  */
-static inline __m256 norm(__m256 real, __m256 imag) {
+static inline __m256 norm(const __m256 real, const __m256 imag) {
   return _mm256_add_ps(_mm256_mul_ps(real, real), _mm256_mul_ps(imag, imag));
 }
 } // namespace utility::avx
@@ -147,8 +150,8 @@ constexpr unsigned int simd_width_bytes = simd_width / 8;
  *
  * @returns The real coordinates.
  */
-__m512 mapColumnsToRealAxis(std::size_t col, std::size_t width, float real_min,
-                            float real_max);
+__m512 mapColumnsToRealAxis(const std::size_t col, const std::size_t width,
+                            const float real_min, const float real_max);
 
 /*
  * Map the row of sixteen consecutive pixels in the same row to the imaginary
@@ -164,8 +167,8 @@ __m512 mapColumnsToRealAxis(std::size_t col, std::size_t width, float real_min,
  *
  * @returns The imaginary coordinates.
  */
-__m512 mapRowToImagAxis(std::size_t row, std::size_t height, float imag_min,
-                        float imag_max);
+__m512 mapRowToImagAxis(const std::size_t row, const std::size_t height,
+                        const float imag_min, const float imag_max);
 
 /*
  * Map sixteen consecutive pixels in the same row onto the complex plane.
@@ -182,9 +185,10 @@ __m512 mapRowToImagAxis(std::size_t row, std::size_t height, float imag_min,
  * @returns The mapped positions of the pixels on the complex plane.
  */
 std::pair<__m512, __m512>
-mapPixelsToComplexPlane(std::size_t row, std::size_t col, std::size_t width,
-                        std::size_t height, float real_min, float real_max,
-                        float imag_min, float imag_max);
+mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
+                        const std::size_t width, const std::size_t height,
+                        const float real_min, const float real_max,
+                        const float imag_min, const float imag_max);
 
 /*
  * Calculate the norms of multiple complex numbers where the real and imaginary
@@ -197,7 +201,7 @@ mapPixelsToComplexPlane(std::size_t row, std::size_t col, std::size_t width,
  *
  * @returns The norms.
  */
-static inline __m512 norm(__m512 real, __m512 imag) {
+static inline __m512 norm(const __m512 real, const __m512 imag) {
   return _mm512_add_ps(_mm512_mul_ps(real, real), _mm512_mul_ps(imag, imag));
 }
 } // namespace utility::avx512

@@ -14,15 +14,16 @@
 #include "mandelbrot.hpp"
 #include "utility.hpp"
 
-MandelbrotResult mandelbrot_avx512_omp(std::size_t width, std::size_t height,
-                                   float real_min, float real_max,
-                                   float imag_min, float imag_max,
-                                   unsigned int max_iterations) {
+MandelbrotResult
+mandelbrot_avx512_omp(const std::size_t width, const std::size_t height,
+                      const float real_min, const float real_max,
+                      const float imag_min, const float imag_max,
+                      const unsigned int max_iterations) {
   if (!__builtin_cpu_supports("avx512f")) {
     std::cerr << "AVX512F not supported on this CPU. Falling back to OpenMP "
                  "version.\n";
-    return mandelbrot_omp(width, height, real_min, real_max, imag_min,
-                             imag_max, max_iterations);
+    return mandelbrot_omp(width, height, real_min, real_max, imag_min, imag_max,
+                          max_iterations);
   }
 
   constexpr std::size_t lanes =
@@ -42,10 +43,11 @@ MandelbrotResult mandelbrot_avx512_omp(std::size_t width, std::size_t height,
       __m512i iter_counts = _mm512_setzero_si512();
 
       for (unsigned int i = 0; i < max_iterations; ++i) {
-        __m512 norm = utility::avx512::norm(z_real, z_imag);
+        const __m512 norm = utility::avx512::norm(z_real, z_imag);
 
         // Check which pixels have not escaped yet.
-        __mmask16 active = _mm512_cmple_ps_mask(norm, _mm512_set1_ps(4.0f));
+        const __mmask16 active =
+            _mm512_cmple_ps_mask(norm, _mm512_set1_ps(4.0f));
 
         // If all pixels have escaped, stop early.
         if (active == 0) {
@@ -56,13 +58,13 @@ MandelbrotResult mandelbrot_avx512_omp(std::size_t width, std::size_t height,
                                             _mm512_set1_epi32(1));
 
         // Calculate the new real parts.
-        __m512 z_real_new =
+        const __m512 z_real_new =
             _mm512_add_ps(_mm512_sub_ps(_mm512_mul_ps(z_real, z_real),
                                         _mm512_mul_ps(z_imag, z_imag)),
                           c_real);
 
         // Calculate the new imaginary parts.
-        __m512 z_imag_new =
+        const __m512 z_imag_new =
             _mm512_add_ps(_mm512_add_ps(_mm512_mul_ps(z_real, z_imag),
                                         _mm512_mul_ps(z_real, z_imag)),
                           c_imag);

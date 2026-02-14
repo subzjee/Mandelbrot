@@ -50,8 +50,8 @@ template <auto Func, ISA Isa> void BM_Mandelbrot(benchmark::State& state) {
     return;
   }
 
-  const auto width = state.range(0);
-  const auto height = state.range(1);
+  const std::size_t width = static_cast<std::size_t>(state.range(0));
+  const std::size_t height = static_cast<std::size_t>(state.range(1));
 
   for (auto _ : state) {
     MandelbrotResult result =

@@ -7,10 +7,11 @@
 
 #include "mandelbrot.hpp"
 
-MandelbrotResult mandelbrot_serial(std::size_t width, std::size_t height,
-                                   float real_min, float real_max,
-                                   float imag_min, float imag_max,
-                                   unsigned int max_iterations) {
+MandelbrotResult mandelbrot_serial(const std::size_t width,
+                                   const std::size_t height,
+                                   const float real_min, const float real_max,
+                                   const float imag_min, const float imag_max,
+                                   const unsigned int max_iterations) {
   MandelbrotResult result(height, std::vector<unsigned int>(width, 0));
 
   for (std::size_t row = 0; row < height; ++row) {

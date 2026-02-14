@@ -16,12 +16,12 @@
 constexpr std::size_t width = 1920, height = 1080;
 constexpr int max_iterations = 1000;
 constexpr float
-    real_min = -1.252213542,
-    real_max = -1.22213542; // The bounds of the real axis on the complex plane.
+    real_min = -1.252213542f,
+    real_max = -1.22213542f; // The bounds of the real axis on the complex plane.
 constexpr float
-    imag_min = 0.108567708,
+    imag_min = 0.108567708f,
     imag_max =
-        0.125442708; // The bounds of the imaginary axis on the complex plane.
+        0.125442708f; // The bounds of the imaginary axis on the complex plane.
 
 int main() {
   MandelbrotResult iterations = mandelbrot_serial(
