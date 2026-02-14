@@ -29,17 +29,17 @@ template <ISA isa>
 struct ExecutionConfig {
   static bool is_available() {
     switch (isa) {
+      case ISA::Generic: return true;
       case ISA::AVX2: return __builtin_cpu_supports("avx2");
       case ISA::AVX512F: return __builtin_cpu_supports("avx512f");
-      default: return true;
     }
   }
 
   static std::string name() {
     switch (isa) {
+      case ISA::Generic: return "Generic";
       case ISA::AVX2: return "AVX2";
       case ISA::AVX512F: return "AVX512F";
-      default: return "Generic";
     }
   }
 };
