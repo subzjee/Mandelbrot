@@ -7,6 +7,7 @@
  * Benchmarks may be skipped depending on the runtime capability of the CPU.
  */
 
+#include <string>
 #include <vector>
 
 #include "benchmark/benchmark.h"
@@ -18,12 +19,34 @@ constexpr float real_min = -2.0f, real_max = 1.0f;
 constexpr float imag_min = -1.0f, imag_max = 1.0f;
 constexpr unsigned int max_iter = 1000;
 
-template <auto Func> void BM_Mandelbrot(benchmark::State& state) {
-  if (Func == mandelbrot_avx2 && !__builtin_cpu_supports("avx2")) {
-    state.SkipWithError("AVX2 not supported on this CPU");
-    return;
-  } else if (Func == mandelbrot_avx512 && !__builtin_cpu_supports("avx512f")) {
-    state.SkipWithError("AVX512F not supported on this CPU");
+enum class ISA {
+  Generic,
+  AVX2,
+  AVX512F
+};
+
+template <ISA isa>
+struct ExecutionConfig {
+  static bool is_available() {
+    switch (isa) {
+      case ISA::AVX2: return __builtin_cpu_supports("avx2");
+      case ISA::AVX512F: return __builtin_cpu_supports("avx512f");
+      default: return true;
+    }
+  }
+
+  static std::string name() {
+    switch (isa) {
+      case ISA::AVX2: return "AVX2";
+      case ISA::AVX512F: return "AVX512F";
+      default: return "Generic";
+    }
+  }
+};
+
+template <auto Func, ISA Isa> void BM_Mandelbrot(benchmark::State& state) {
+  if (!ExecutionConfig<Isa>::is_available()) {
+    state.SkipWithError(ExecutionConfig<Isa>::name() + " is not supported on this machine");
     return;
   }
 
@@ -45,29 +68,29 @@ template <auto Func> void BM_Mandelbrot(benchmark::State& state) {
       ->Args({3840, 2160})                                                     \
       ->UseRealTime()
 
-#define MANDEL_BENCH(NAME, FUNC)                                               \
-  BENCHMARK(BM_Mandelbrot<FUNC>)->Name(NAME) COMMON_ARGS;
+#define MANDEL_BENCH(NAME, FUNC, ISA)                                               \
+  BENCHMARK(BM_Mandelbrot<FUNC, ISA>)->Name(NAME) COMMON_ARGS;
 
-MANDEL_BENCH("Serial", mandelbrot_serial)
+MANDEL_BENCH("Serial", mandelbrot_serial, ISA::Generic)
 
 #if defined(_OPENMP)
-MANDEL_BENCH("OMP", mandelbrot_omp)
+MANDEL_BENCH("OMP", mandelbrot_omp, ISA::Generic)
 #endif
 
 #if defined(__AVX2__)
-MANDEL_BENCH("AVX2", mandelbrot_avx2)
+MANDEL_BENCH("AVX2", mandelbrot_avx2, ISA::AVX2)
 #endif
 
 #if defined(__AVX2__) && defined(_OPENMP)
-MANDEL_BENCH("AVX2_OMP", mandelbrot_avx2_omp)
+MANDEL_BENCH("AVX2_OMP", mandelbrot_avx2_omp, ISA::AVX2)
 #endif
 
 #if defined(__AVX512F__)
-MANDEL_BENCH("AVX512", mandelbrot_avx512)
+MANDEL_BENCH("AVX512", mandelbrot_avx512, ISA::AVX512F)
 #endif
 
 #if defined(__AVX512F__) && defined(_OPENMP)
-MANDEL_BENCH("AVX512_OMP", mandelbrot_avx512_omp)
+MANDEL_BENCH("AVX512_OMP", mandelbrot_avx512_omp, ISA::AVX512F)
 #endif
 
 BENCHMARK_MAIN();
