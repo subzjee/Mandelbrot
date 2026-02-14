@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include "mandelbrot.hpp"
+#include "mandelbrot_result.hpp"
 #include "utility.hpp"
 
 MandelbrotResult mandelbrot_avx512(const std::size_t width,
@@ -29,7 +30,7 @@ MandelbrotResult mandelbrot_avx512(const std::size_t width,
   constexpr std::size_t lanes =
       utility::avx512::simd_width_bytes / sizeof(float);
 
-  MandelbrotResult result(height, std::vector<unsigned int>(width, 0));
+  std::unique_ptr<unsigned int[]> iterations = std::make_unique<unsigned int[]>(width * height);
 
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; col += lanes) {
@@ -77,12 +78,12 @@ MandelbrotResult mandelbrot_avx512(const std::size_t width,
       _mm512_store_si512(reinterpret_cast<__m512i*>(lane_iters), iter_counts);
 
       for (std::size_t i = 0; i < std::min(lanes, width - col); ++i) {
-        result[row][col + i] = static_cast<unsigned int>(lane_iters[i]);
+        iterations[row * width + col + i] = static_cast<unsigned int>(lane_iters[i]);
       }
     }
   }
 
-  return result;
+  return {std::move(iterations), width, height};
 }
 
 #endif

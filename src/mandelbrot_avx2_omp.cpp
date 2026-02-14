@@ -12,6 +12,7 @@
 #include <immintrin.h>
 
 #include "mandelbrot.hpp"
+#include "mandelbrot_result.hpp"
 #include "utility.hpp"
 
 MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
@@ -28,7 +29,7 @@ MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
 
   constexpr std::size_t lanes = utility::avx::simd_width_bytes / sizeof(float);
 
-  MandelbrotResult result(height, std::vector<unsigned int>(width, 0));
+  std::unique_ptr<unsigned int[]> iterations = std::make_unique<unsigned int[]>(width * height);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
@@ -80,12 +81,12 @@ MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
       _mm256_store_si256(reinterpret_cast<__m256i*>(lane_iters), iter_counts);
 
       for (std::size_t i = 0; i < std::min(lanes, width - col); ++i) {
-        result[row][col + i] = static_cast<unsigned int>(lane_iters[i]);
+        iterations[row * width + col + i] = static_cast<unsigned int>(lane_iters[i]);
       }
     }
   }
 
-  return result;
+  return {std::move(iterations), width, height};
 }
 
 #endif

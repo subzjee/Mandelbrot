@@ -3,16 +3,17 @@
  */
 
 #include <complex>
-#include <vector>
 
 #include "mandelbrot.hpp"
+#include "mandelbrot_result.hpp"
+#include "utility.hpp"
 
 MandelbrotResult mandelbrot_serial(const std::size_t width,
                                    const std::size_t height,
                                    const float real_min, const float real_max,
                                    const float imag_min, const float imag_max,
                                    const unsigned int max_iterations) {
-  MandelbrotResult result(height, std::vector<unsigned int>(width, 0));
+  std::unique_ptr<unsigned int[]> iterations = std::make_unique<unsigned int[]>(width * height);
 
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; ++col) {
@@ -27,9 +28,9 @@ MandelbrotResult mandelbrot_serial(const std::size_t width,
         ++iteration;
       }
 
-      result[row][col] = iteration;
+      iterations[row * width + col] = iteration;
     }
   }
 
-  return result;
+  return {std::move(iterations), width, height};
 }

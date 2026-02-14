@@ -5,13 +5,8 @@
 #pragma once
 
 #include <complex>
-#include <vector>
 
 #include <immintrin.h>
-
-template <typename T> using Matrix = std::vector<std::vector<T>>;
-
-using MandelbrotResult = Matrix<unsigned int>;
 
 namespace utility {
 namespace {

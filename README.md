@@ -1,5 +1,5 @@
 # **Mandelbrot**
-A Mandelbrot set library in C++17 featuring optional OpenMP and AVX2/AVX512 support. It uses the escape-time algorithm to obtain the iteration count.
+A Mandelbrot set library in C++20 featuring optional OpenMP and AVX2/AVX512 support. It uses the escape-time algorithm to obtain the iteration count.
 
 ---
 
@@ -20,7 +20,7 @@ The Mandelbrot set has fascinated me for two reasons:
 ---
 
 ## Requirements
-* Clang/GCC with C++17 support.
+* Clang/GCC with C++20 support.
 * CMake 3.31+ for ease-of-building.
 * Optional:
   * A compiler supporting OpenMP to enable the OpenMP implementations.
@@ -81,11 +81,11 @@ Then, you can include the header and use the library as shown below:
 #include "mandelbrot.hpp"
 
 int main() {
-  MandelbrotResult iterations = mandelbrot_serial(1920, 1080, -2.0f, 1.0f, -1.0f, 1.0f, 1000);
+  MandelbrotResult result = mandelbrot_serial(1920, 1080, -2.0f, 1.0f, -1.0f, 1.0f, 1000);
   
   // Print the iteration count for each pixel.
-  for (std::size_t row = 0; row < iterations.size(); ++row) {
-    for (std::size_t col = 0; col < iterations[row].size(); ++col) {
+  for (std::size_t row = 0; row < result.height(); ++row) {
+    for (std::size_t col = 0; col < result.width(); ++col) {
       std::cout << iterations[row][col] << '\n';
     }
   }

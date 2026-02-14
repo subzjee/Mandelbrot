@@ -13,7 +13,7 @@
 #include "benchmark/benchmark.h"
 
 #include "mandelbrot.hpp"
-#include "utility.hpp"
+#include "mandelbrot_result.hpp"
 
 constexpr float real_min = -2.0f, real_max = 1.0f;
 constexpr float imag_min = -1.0f, imag_max = 1.0f;
@@ -56,7 +56,6 @@ template <auto Func, Target target> void BM_Mandelbrot(benchmark::State& state) 
   for (auto _ : state) {
     MandelbrotResult result =
         Func(width, height, real_min, real_max, imag_min, imag_max, max_iter);
-    benchmark::DoNotOptimize(result);
   }
 }
 

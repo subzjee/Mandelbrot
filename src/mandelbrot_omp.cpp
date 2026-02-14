@@ -7,6 +7,7 @@
 #include <complex>
 
 #include "mandelbrot.hpp"
+#include "mandelbrot_result.hpp"
 #include "utility.hpp"
 
 MandelbrotResult mandelbrot_omp(const std::size_t width,
@@ -14,7 +15,7 @@ MandelbrotResult mandelbrot_omp(const std::size_t width,
                                 const float real_max, const float imag_min,
                                 const float imag_max,
                                 const unsigned int max_iterations) {
-  MandelbrotResult result(height, std::vector<unsigned int>(width, 0));
+  std::unique_ptr<unsigned int[]> iterations = std::make_unique<unsigned int[]>(width * height);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
@@ -30,11 +31,11 @@ MandelbrotResult mandelbrot_omp(const std::size_t width,
         ++iteration;
       }
 
-      result[row][col] = iteration;
+      iterations[row * width + col] = iteration;
     }
   }
 
-  return result;
+  return {std::move(iterations), width, height};
 }
 
 #endif
