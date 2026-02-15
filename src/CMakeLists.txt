@@ -5,7 +5,8 @@ set(SOURCE_FILES
     mandelbrot_avx512_omp.cpp
     mandelbrot_omp.cpp
     mandelbrot_serial.cpp
-    utility.cpp
+    utility_avx.cpp
+    utility_avx512.cpp
 )
 
 add_library(mandelbrot ${SOURCE_FILES})

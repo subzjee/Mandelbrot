@@ -34,7 +34,7 @@ MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; col += lanes) {
-      const auto [c_real, c_imag] = utility::avx::mapPixelsToComplexPlane(
+      const auto [c_real, c_imag] = utility::avx::detail::mapPixelsToComplexPlane(
           row, col, width, height, real_min, real_max, imag_min, imag_max);
 
       __m256 z_real = _mm256_setzero_ps();
@@ -43,7 +43,7 @@ MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
       __m256i iter_counts = _mm256_setzero_si256();
 
       for (unsigned int i = 0; i < max_iterations; ++i) {
-        const __m256 norm = utility::avx::norm(z_real, z_imag);
+        const __m256 norm = utility::avx::detail::norm(z_real, z_imag);
 
         // Check which pixels have not escaped yet.
         const __m256 active =

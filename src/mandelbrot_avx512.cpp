@@ -34,7 +34,7 @@ MandelbrotResult mandelbrot_avx512(const std::size_t width,
 
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; col += lanes) {
-      const auto [c_real, c_imag] = utility::avx512::mapPixelsToComplexPlane(
+      const auto [c_real, c_imag] = utility::avx512::detail::mapPixelsToComplexPlane(
           row, col, width, height, real_min, real_max, imag_min, imag_max);
 
       __m512 z_real = _mm512_setzero_ps();
@@ -43,7 +43,7 @@ MandelbrotResult mandelbrot_avx512(const std::size_t width,
       __m512i iter_counts = _mm512_setzero_si512();
 
       for (unsigned int i = 0; i < max_iterations; ++i) {
-        const __m512 norm = utility::avx512::norm(z_real, z_imag);
+        const __m512 norm = utility::avx512::detail::norm(z_real, z_imag);
 
         // Check which pixels have not escaped yet.
         const __mmask16 active =

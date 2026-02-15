@@ -9,7 +9,7 @@
 #include <immintrin.h>
 
 namespace utility {
-namespace {
+namespace detail {
 /*
  * Map an index in a 1D structure to a bounded axis linearly.
  *
@@ -28,7 +28,6 @@ constexpr float mapIndexToBoundedAxis(const std::size_t idx,
          (static_cast<float>(idx) / static_cast<float>(num_spaces - 1)) *
              (end - start);
 }
-} // namespace
 
 /*
  * Map a pixel in an image structured as a 1D array to the complex plane.
@@ -54,13 +53,14 @@ mapPixelToComplexPlane(const std::size_t row, const std::size_t col,
       mapIndexToBoundedAxis(row, height, imag_max, imag_min) // Imag axis
   };
 }
-} // namespace utility
+}
 
 #if defined(__AVX__)
-namespace utility::avx {
-constexpr unsigned int simd_width = 256; // The SIMD width in bits.
-constexpr unsigned int simd_width_bytes = simd_width / 8;
+namespace avx {
+  constexpr unsigned int simd_width = 256; // The SIMD width in bits.
+  constexpr unsigned int simd_width_bytes = simd_width / 8;
 
+namespace detail {
 /*
  * Map the columns of eight consecutive pixels in the same row starting at
  * column `col` to their real coordinates in the complex plane.
@@ -126,14 +126,16 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
 static inline __m256 norm(const __m256 real, const __m256 imag) {
   return _mm256_add_ps(_mm256_mul_ps(real, real), _mm256_mul_ps(imag, imag));
 }
-} // namespace utility::avx
+}
+}
 #endif
 
 #if defined(__AVX512F__)
-namespace utility::avx512 {
-constexpr unsigned int simd_width = 512; // The SIMD width in bits.
-constexpr unsigned int simd_width_bytes = simd_width / 8;
+namespace avx512 {
+  constexpr unsigned int simd_width = 512; // The SIMD width in bits.
+  constexpr unsigned int simd_width_bytes = simd_width / 8;
 
+namespace detail {
 /*
  * Map the columns of sixteen consecutive pixels in the same row starting at
  * column `col` to their real coordinates in the complex plane.
@@ -199,5 +201,8 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
 static inline __m512 norm(const __m512 real, const __m512 imag) {
   return _mm512_add_ps(_mm512_mul_ps(real, real), _mm512_mul_ps(imag, imag));
 }
-} // namespace utility::avx512
+}
+}
+}
+
 #endif

@@ -18,7 +18,7 @@ MandelbrotResult mandelbrot_serial(const std::size_t width,
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; ++col) {
       std::complex<float> z{0.0, 0.0};
-      const std::complex<float> c = utility::mapPixelToComplexPlane(
+      const std::complex<float> c = utility::detail::mapPixelToComplexPlane(
           row, col, width, height, real_min, real_max, imag_min, imag_max);
 
       unsigned int iteration{0};

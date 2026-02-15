@@ -134,7 +134,8 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
     ├── mandelbrot_avx512_omp.cpp   # AVX512 + OpenMP implementation 
     ├── mandelbrot_omp.cpp          # OpenMP implementation
     ├── mandelbrot_serial.cpp       # Serial implementation
-    └── utility.cpp                 # Helper functions
+    ├── utility_avx.cpp             # AVX helper functions
+    └── utility_avx512.cpp          # AVX512 helper functions
 ```
 
 ---
