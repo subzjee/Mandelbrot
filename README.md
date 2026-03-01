@@ -128,9 +128,11 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 ├── CMakeLists.txt                  # Root CMake file
 ├── examples
 │   ├── CMakeLists.txt
-│   └── greyscale.cpp               # Export as greyscale example
+│   ├── greyscale.cpp               # Greyscale example
+│   └── rainbow.cpp                 # RGB example
 ├── include           
 │   ├── mandelbrot.hpp              # Main functions
+│   ├── mandelbrot_result.hpp
 │   └── utility.hpp                 # Helper functions
 ├── LICENSE
 ├── README.md
