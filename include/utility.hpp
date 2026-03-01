@@ -123,7 +123,7 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
  *
  * @returns The norms.
  */
-static inline __m256 norm(const __m256 real, const __m256 imag) {
+inline __m256 norm(const __m256 real, const __m256 imag) {
   return _mm256_add_ps(_mm256_mul_ps(real, real), _mm256_mul_ps(imag, imag));
 }
 }
@@ -198,7 +198,7 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
  *
  * @returns The norms.
  */
-static inline __m512 norm(const __m512 real, const __m512 imag) {
+inline __m512 norm(const __m512 real, const __m512 imag) {
   return _mm512_add_ps(_mm512_mul_ps(real, real), _mm512_mul_ps(imag, imag));
 }
 }
