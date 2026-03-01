@@ -31,7 +31,7 @@ int main() {
   cv::Mat pixels(height * ssaa_factor, width * ssaa_factor, CV_8UC3);
 
   MandelbrotResult iterations =
-      mandelbrot_avx512_omp(pixels.cols, pixels.rows, real_min, real_max,
+      mandelbrot_serial(pixels.cols, pixels.rows, real_min, real_max,
                             imag_min, imag_max, max_iterations);
 
   for (std::size_t row = 0; row < pixels.rows; ++row) {
