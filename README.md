@@ -20,10 +20,11 @@ The Mandelbrot set has fascinated me for two reasons:
 ---
 
 ## Requirements
-* Clang/GCC with C++20 support.
+* A compiler with C++20 support.
 * CMake 3.31+ for ease-of-building.
 * Optional:
   * A compiler supporting OpenMP to enable the OpenMP implementations.
+  * A compiler supporting x86/x86-64 SIMD intrinsics to enable the AVX* implementations.
   * AVX2-capable CPU to use the AVX2 implementations.
   * AVX512-capable CPU to use the AVX512 implementations.
 
