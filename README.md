@@ -87,7 +87,7 @@ int main() {
   // Print the iteration count for each pixel.
   for (std::size_t row = 0; row < result.height(); ++row) {
     for (std::size_t col = 0; col < result.width(); ++col) {
-      std::cout << iterations[row][col] << '\n';
+      std::cout << result[row][col].iteration << '\n';
     }
   }
   return 0;
