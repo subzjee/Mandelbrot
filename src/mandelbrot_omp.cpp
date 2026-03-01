@@ -15,7 +15,8 @@ MandelbrotResult mandelbrot_omp(const std::size_t width,
                                 const float real_max, const float imag_min,
                                 const float imag_max,
                                 const unsigned int max_iterations) {
-  std::unique_ptr<unsigned int[]> iterations = std::make_unique<unsigned int[]>(width * height);
+  std::unique_ptr<EscapeResult[]> result =
+      std::make_unique<EscapeResult[]>(width * height);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
@@ -31,11 +32,11 @@ MandelbrotResult mandelbrot_omp(const std::size_t width,
         ++iteration;
       }
 
-      iterations[row * width + col] = iteration;
+      result[row * width + col] = {iteration, z};
     }
   }
 
-  return {std::move(iterations), width, height};
+  return {std::move(result), width, height};
 }
 
 #endif

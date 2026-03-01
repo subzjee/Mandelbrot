@@ -95,7 +95,8 @@ int main() {
 
 This example uses the serial implementation to generate the Mandelbrot set for a 1920x1080 image. The complex plane is bounded by [-2.0, 1.0] for the real axis and [-1.0, 1.0] for the imaginary axis, with a maximum of 1000 iterations per pixel.
 
-For more examples, which export it to an actual image, check out the `examples` directory.
+### Examples
+For more examples, check out the `examples` directory.
 To build the examples, add `-DBUILD_EXAMPLES=ON` while building the library.
 For ease-of-use, the examples do require OpenCV to be installed.
 
@@ -105,6 +106,13 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 ```
 
 ![Greyscale example of the Mandelbrot set](/examples/greyscale.png)
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
+./build/examples/rainbow
+```
+
+![Rainbow-colored example of the Mandelbrot set](/examples/rainbow.png)
 
 ---
 

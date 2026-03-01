@@ -13,7 +13,8 @@ MandelbrotResult mandelbrot_serial(const std::size_t width,
                                    const float real_min, const float real_max,
                                    const float imag_min, const float imag_max,
                                    const unsigned int max_iterations) {
-  std::unique_ptr<unsigned int[]> iterations = std::make_unique<unsigned int[]>(width * height);
+  std::unique_ptr<EscapeResult[]> result =
+      std::make_unique<EscapeResult[]>(width * height);
 
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; ++col) {
@@ -28,9 +29,9 @@ MandelbrotResult mandelbrot_serial(const std::size_t width,
         ++iteration;
       }
 
-      iterations[row * width + col] = iteration;
+      result[row * width + col] = {iteration, z};
     }
   }
 
-  return {std::move(iterations), width, height};
+  return {std::move(result), width, height};
 }

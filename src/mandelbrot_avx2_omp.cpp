@@ -29,13 +29,15 @@ MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
 
   constexpr std::size_t lanes = utility::avx::simd_width_bytes / sizeof(float);
 
-  std::unique_ptr<unsigned int[]> iterations = std::make_unique<unsigned int[]>(width * height);
+  std::unique_ptr<EscapeResult[]> result =
+      std::make_unique<EscapeResult[]>(width * height);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; col += lanes) {
-      const auto [c_real, c_imag] = utility::avx::detail::mapPixelsToComplexPlane(
-          row, col, width, height, real_min, real_max, imag_min, imag_max);
+      const auto [c_real, c_imag] =
+          utility::avx::detail::mapPixelsToComplexPlane(
+              row, col, width, height, real_min, real_max, imag_min, imag_max);
 
       __m256 z_real = _mm256_setzero_ps();
       __m256 z_imag = _mm256_setzero_ps();
@@ -78,15 +80,22 @@ MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
       }
 
       alignas(utility::avx::simd_width_bytes) int lane_iters[lanes];
+      alignas(utility::avx::simd_width_bytes) float lane_real[lanes];
+      alignas(utility::avx::simd_width_bytes) float lane_imag[lanes];
+
       _mm256_store_si256(reinterpret_cast<__m256i*>(lane_iters), iter_counts);
+      _mm256_store_ps(lane_real, z_real);
+      _mm256_store_ps(lane_real, z_real);
 
       for (std::size_t i = 0; i < std::min(lanes, width - col); ++i) {
-        iterations[row * width + col + i] = static_cast<unsigned int>(lane_iters[i]);
+        result[row * width + col + i] = {
+            static_cast<unsigned int>(lane_iters[i]),
+            std::complex<float>(lane_real[i], lane_imag[i])};
       }
     }
   }
 
-  return {std::move(iterations), width, height};
+  return {std::move(result), width, height};
 }
 
 #endif

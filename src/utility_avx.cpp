@@ -10,7 +10,7 @@
 
 namespace utility::avx::detail {
 __m256 mapRowToImagAxis(const std::size_t row, const std::size_t height,
-                             const float imag_min, const float imag_max) {
+                        const float imag_min, const float imag_max) {
   const float imag =
       utility::detail::mapIndexToBoundedAxis(row, height, imag_max, imag_min);
 
@@ -18,7 +18,7 @@ __m256 mapRowToImagAxis(const std::size_t row, const std::size_t height,
 }
 
 __m256 mapColumnsToRealAxis(const std::size_t col, const std::size_t width,
-                                 const float real_min, const float real_max) {
+                            const float real_min, const float real_max) {
   const __m256 col_indices =
       _mm256_set_ps(static_cast<float>(col + 7), static_cast<float>(col + 6),
                     static_cast<float>(col + 5), static_cast<float>(col + 4),
@@ -36,15 +36,14 @@ __m256 mapColumnsToRealAxis(const std::size_t col, const std::size_t width,
 
 std::pair<__m256, __m256>
 mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
-                             const std::size_t width, const std::size_t height,
-                             const float real_min, const float real_max,
-                             const float imag_min, const float imag_max) {
-  const __m256 reals =
-      mapColumnsToRealAxis(col, width, real_min, real_max);
+                        const std::size_t width, const std::size_t height,
+                        const float real_min, const float real_max,
+                        const float imag_min, const float imag_max) {
+  const __m256 reals = mapColumnsToRealAxis(col, width, real_min, real_max);
   const __m256 imags = mapRowToImagAxis(row, height, imag_min, imag_max);
 
   return {reals, imags};
 }
-}
+} // namespace utility::avx::detail
 
 #endif

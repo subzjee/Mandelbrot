@@ -10,17 +10,15 @@
 
 namespace utility::avx512::detail {
 __m512 mapRowToImagAxis(const std::size_t row, const std::size_t height,
-                                const float imag_min, const float imag_max) {
+                        const float imag_min, const float imag_max) {
   const float imag =
       utility::detail::mapIndexToBoundedAxis(row, height, imag_max, imag_min);
 
   return _mm512_set1_ps(imag);
 }
 
-__m512 mapColumnsToRealAxis(const std::size_t col,
-                                    const std::size_t width,
-                                    const float real_min,
-                                    const float real_max) {
+__m512 mapColumnsToRealAxis(const std::size_t col, const std::size_t width,
+                            const float real_min, const float real_max) {
   const __m512 col_indices =
       _mm512_set_ps(static_cast<float>(col + 15), static_cast<float>(col + 14),
                     static_cast<float>(col + 13), static_cast<float>(col + 12),
@@ -40,16 +38,15 @@ __m512 mapColumnsToRealAxis(const std::size_t col,
   return reals;
 }
 
-std::pair<__m512, __m512> mapPixelsToComplexPlane(
-    const std::size_t row, const std::size_t col, const std::size_t width,
-    const std::size_t height, const float real_min, const float real_max,
-    const float imag_min, const float imag_max) {
-  const __m512 reals =
-      mapColumnsToRealAxis(col, width, real_min, real_max);
-  const __m512 imags =
-      mapRowToImagAxis(row, height, imag_min, imag_max);
+std::pair<__m512, __m512>
+mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
+                        const std::size_t width, const std::size_t height,
+                        const float real_min, const float real_max,
+                        const float imag_min, const float imag_max) {
+  const __m512 reals = mapColumnsToRealAxis(col, width, real_min, real_max);
+  const __m512 imags = mapRowToImagAxis(row, height, imag_min, imag_max);
 
   return {reals, imags};
 }
-}
+} // namespace utility::avx512::detail
 #endif
