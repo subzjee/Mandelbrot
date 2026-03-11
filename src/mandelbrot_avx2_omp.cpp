@@ -1,13 +1,8 @@
 /*
- * This file contains the AVX2 + OpenMP implementation of the algorithm.
- *
- * Note: The implementation will fallback to the OpenMP implementation, in case
- * that the current CPU does not support AVX2 instructions.
+ * This file contains the AVX2 + OpenMP implementation.
  */
 
 #if defined(__AVX2__) && defined(_OPENMP)
-
-#include <iostream>
 
 #include <immintrin.h>
 
@@ -21,16 +16,14 @@ MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
                                      const float imag_min, const float imag_max,
                                      const unsigned int max_iterations) {
   if (!__builtin_cpu_supports("avx2")) {
-    std::cerr
-        << "AVX2 not supported on this CPU. Falling back to OpenMP version.\n";
-    return mandelbrot_omp(width, height, real_min, real_max, imag_min, imag_max,
-                          max_iterations);
+    throw std::runtime_error("AVX2 not supported on this CPU.");
   }
 
   constexpr std::size_t lanes = utility::avx::simd_width_bytes / sizeof(float);
 
-  std::unique_ptr<EscapeResult[]> result =
-      std::make_unique<EscapeResult[]>(width * height);
+  auto iterations = std::make_unique<unsigned int[]>(width * height);
+  auto z_reals = std::make_unique<float[]>(width * height);
+  auto z_imags = std::make_unique<float[]>(width * height);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
@@ -79,23 +72,36 @@ MandelbrotResult mandelbrot_avx2_omp(const std::size_t width,
         z_imag = _mm256_blendv_ps(z_imag, z_imag_new, active);
       }
 
-      alignas(utility::avx::simd_width_bytes) int lane_iters[lanes];
-      alignas(utility::avx::simd_width_bytes) float lane_real[lanes];
-      alignas(utility::avx::simd_width_bytes) float lane_imag[lanes];
+      const std::size_t base_idx = row * width + col;
+      const std::size_t remaining = std::min(lanes, width - col);
 
-      _mm256_store_si256(reinterpret_cast<__m256i*>(lane_iters), iter_counts);
-      _mm256_store_ps(lane_real, z_real);
-      _mm256_store_ps(lane_real, z_real);
+      if (remaining == lanes) {
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(&iterations[base_idx]),
+                            iter_counts);
+        _mm256_storeu_ps(&z_reals[base_idx], z_real);
+        _mm256_storeu_ps(&z_imags[base_idx], z_imag);
+      } else {
+        // AVX2 doesn't have masked stores so we have to manually copy the
+        // remaining elements if it doesn't fit perfectly in a lane.
+        alignas(utility::avx::simd_width_bytes) int lane_iters[lanes];
+        alignas(utility::avx::simd_width_bytes) float lane_real[lanes];
+        alignas(utility::avx::simd_width_bytes) float lane_imag[lanes];
 
-      for (std::size_t i = 0; i < std::min(lanes, width - col); ++i) {
-        result[row * width + col + i] = {
-            static_cast<unsigned int>(lane_iters[i]),
-            std::complex<float>(lane_real[i], lane_imag[i])};
+        _mm256_store_si256(reinterpret_cast<__m256i*>(lane_iters), iter_counts);
+        _mm256_store_ps(lane_real, z_real);
+        _mm256_store_ps(lane_imag, z_imag);
+
+        for (std::size_t i = 0; i < std::min(lanes, width - col); ++i) {
+          iterations[base_idx + i] = static_cast<unsigned int>(lane_iters[i]);
+          z_reals[base_idx + i] = lane_real[i];
+          z_imags[base_idx + i] = lane_imag[i];
+        }
       }
     }
   }
 
-  return {std::move(result), width, height};
+  return {std::move(iterations), std::move(z_reals), std::move(z_imags), width,
+          height};
 }
 
 #endif

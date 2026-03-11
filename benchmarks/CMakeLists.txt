@@ -12,8 +12,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(benchmark)
 
 add_executable(bm_mandelbrot bm_mandelbrot.cpp)
-target_link_libraries(bm_mandelbrot PRIVATE mandelbrot benchmark::benchmark)
+add_dependencies(bm_mandelbrot mandelbrot)
 configure_target(bm_mandelbrot)
+target_link_libraries(bm_mandelbrot PRIVATE mandelbrot benchmark::benchmark)
+
+if(ENABLE_OMP)
+    target_link_libraries(bm_mandelbrot PRIVATE OpenMP::OpenMP_CXX)
+endif()
 
 add_custom_target(run_benchmarks
     COMMAND bm_mandelbrot

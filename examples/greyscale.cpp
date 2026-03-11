@@ -25,7 +25,6 @@ constexpr float
         0.125442708f; // The bounds of the imaginary axis on the complex plane.
 
 int main() {
-  // Setup the image.
   cv::Mat pixels(height, width, CV_8UC1);
 
   MandelbrotResult result =
@@ -34,7 +33,7 @@ int main() {
 
   for (std::size_t row = 0; row < pixels.rows; ++row) {
     for (std::size_t col = 0; col < pixels.cols; ++col) {
-      unsigned int iteration = result[row][col].iteration;
+      unsigned int iteration = result(row, col).iteration;
       // The OpenCV material format uses unsigned 8-bit single-channel colors.
       // Therefore, we convert it to `uchar`.
       pixels.at<uchar>(row, col) = static_cast<uchar>(
@@ -42,7 +41,6 @@ int main() {
     }
   }
 
-  // Save the image.
   cv::imwrite("greyscale.png", pixels);
 
   return 0;

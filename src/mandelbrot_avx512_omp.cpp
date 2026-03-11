@@ -1,13 +1,8 @@
 /*
- * This file contains the AVX512 + OpenMP implementation of the algorithm.
- *
- * Note: The implementation will fallback to the OpenMP implementation, in case
- * that the current CPU does not support AVX2 instructions.
+ * This file contains the AVX512 + OpenMP implementation.
  */
 
-#if defined(__AVX512F__)
-
-#include <iostream>
+#if defined(__AVX512F__) && defined(_OPENMP)
 
 #include <immintrin.h>
 
@@ -21,17 +16,15 @@ mandelbrot_avx512_omp(const std::size_t width, const std::size_t height,
                       const float imag_min, const float imag_max,
                       const unsigned int max_iterations) {
   if (!__builtin_cpu_supports("avx512f")) {
-    std::cerr << "AVX512F not supported on this CPU. Falling back to OpenMP "
-                 "version.\n";
-    return mandelbrot_omp(width, height, real_min, real_max, imag_min, imag_max,
-                          max_iterations);
+    throw std::runtime_error("AVX512 not supported on this CPU.");
   }
 
   constexpr std::size_t lanes =
       utility::avx512::simd_width_bytes / sizeof(float);
 
-  std::unique_ptr<EscapeResult[]> result =
-      std::make_unique<EscapeResult[]>(width * height);
+  auto iterations = std::make_unique<unsigned int[]>(width * height);
+  auto z_reals = std::make_unique<float[]>(width * height);
+  auto z_imags = std::make_unique<float[]>(width * height);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
@@ -43,7 +36,7 @@ mandelbrot_avx512_omp(const std::size_t width, const std::size_t height,
       __m512 z_real = _mm512_setzero_ps();
       __m512 z_imag = _mm512_setzero_ps();
 
-      __m512i iter_counts = _mm512_setzero_si512();
+      __m512i iter_counts = _mm512_setzero_epi32();
 
       for (unsigned int i = 0; i < max_iterations; ++i) {
         const __m512 norm = utility::avx512::detail::norm(z_real, z_imag);
@@ -77,23 +70,19 @@ mandelbrot_avx512_omp(const std::size_t width, const std::size_t height,
         z_imag = _mm512_mask_blend_ps(active, z_imag, z_imag_new);
       }
 
-      alignas(utility::avx512::simd_width_bytes) int lane_iters[lanes];
-      alignas(utility::avx512::simd_width_bytes) float lane_real[lanes];
-      alignas(utility::avx512::simd_width_bytes) float lane_imag[lanes];
+      const std::size_t base_idx = row * width + col;
+      const std::size_t remaining = std::min(lanes, width - col);
+      const __mmask16 store_mask =
+          (remaining == lanes) ? 0xFFFF : (1 << remaining) - 1;
 
-      _mm512_store_si512(reinterpret_cast<__m512i*>(lane_iters), iter_counts);
-      _mm512_store_ps(lane_real, z_real);
-      _mm512_store_ps(lane_imag, z_imag);
-
-      for (std::size_t i = 0; i < std::min(lanes, width - col); ++i) {
-        result[row * width + col + i] = {
-            static_cast<unsigned int>(lane_iters[i]),
-            std::complex<float>(lane_real[i], lane_imag[i])};
-      }
+      _mm512_mask_storeu_ps(&z_reals[base_idx], store_mask, z_real);
+      _mm512_mask_storeu_ps(&z_imags[base_idx], store_mask, z_imag);
+      _mm512_mask_storeu_epi32(&iterations[base_idx], store_mask, iter_counts);
     }
   }
 
-  return {std::move(result), width, height};
+  return {std::move(iterations), std::move(z_reals), std::move(z_imags), width,
+          height};
 }
 
 #endif

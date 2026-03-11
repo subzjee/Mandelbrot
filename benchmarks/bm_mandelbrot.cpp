@@ -1,10 +1,7 @@
 /*
  * This file contains the benchmarks for the various implementations.
  *
- * The benchmarks included are: serial, AVX2, AVX512 and then the combination for each
- * with OpenMP.
- *
- * Benchmarks may be skipped depending on the runtime capability of the CPU.
+ * Benchmarks may be skipped depending on the runtime capability of the system.
  */
 
 #include <string>
@@ -19,34 +16,37 @@ constexpr float real_min = -2.0f, real_max = 1.0f;
 constexpr float imag_min = -1.0f, imag_max = 1.0f;
 constexpr unsigned int max_iter = 1000;
 
-enum class Target {
-  Generic,
-  AVX2,
-  AVX512F
-};
+enum class Target { Generic, AVX2, AVX512F };
 
-template <Target target>
-struct ExecutionConfig {
+template <Target target> struct ExecutionConfig {
   static bool is_available() {
     switch (target) {
-      case Target::Generic: return true;
-      case Target::AVX2: return __builtin_cpu_supports("avx2");
-      case Target::AVX512F: return __builtin_cpu_supports("avx512f");
+    case Target::Generic:
+      return true;
+    case Target::AVX2:
+      return __builtin_cpu_supports("avx2");
+    case Target::AVX512F:
+      return __builtin_cpu_supports("avx512f");
     }
   }
 
   static std::string name() {
     switch (target) {
-      case Target::Generic: return "Generic";
-      case Target::AVX2: return "AVX2";
-      case Target::AVX512F: return "AVX512F";
+    case Target::Generic:
+      return "Generic";
+    case Target::AVX2:
+      return "AVX2";
+    case Target::AVX512F:
+      return "AVX512F";
     }
   }
 };
 
-template <auto Func, Target target> void BM_Mandelbrot(benchmark::State& state) {
+template <auto Func, Target target>
+void BM_Mandelbrot(benchmark::State& state) {
   if (!ExecutionConfig<target>::is_available()) {
-    state.SkipWithError(ExecutionConfig<target>::name() + " is not supported on this machine");
+    state.SkipWithError(ExecutionConfig<target>::name() +
+                        " is not supported on this machine");
     return;
   }
 

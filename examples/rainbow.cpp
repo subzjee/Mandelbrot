@@ -27,7 +27,6 @@ constexpr float
         0.125442708f; // The bounds of the imaginary axis on the complex plane.
 
 int main() {
-  // Setup the image.
   cv::Mat pixels(height * ssaa_factor, width * ssaa_factor, CV_8UC3);
 
   MandelbrotResult iterations =
@@ -36,7 +35,7 @@ int main() {
 
   for (std::size_t row = 0; row < pixels.rows; ++row) {
     for (std::size_t col = 0; col < pixels.cols; ++col) {
-      auto&& [iteration, z] = iterations[row][col];
+      auto&& [iteration, z] = iterations(row, col);
 
       if (iteration == max_iterations) {
         pixels.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 0, 0);
@@ -67,7 +66,6 @@ int main() {
              cv::Size(pixels.cols / ssaa_factor, pixels.rows / ssaa_factor), 0,
              0, cv::INTER_AREA);
 
-  // Save the image.
   cv::imwrite("rainbow.png", pixels);
 
   return 0;

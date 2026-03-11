@@ -3,6 +3,7 @@
  */
 
 #pragma once
+
 #include "mandelbrot_result.hpp"
 
 MandelbrotResult mandelbrot_serial(const std::size_t width,

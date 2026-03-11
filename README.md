@@ -1,5 +1,5 @@
 # **Mandelbrot**
-A Mandelbrot set library in C++20 featuring optional OpenMP and AVX2/AVX512 support. It uses the escape-time algorithm to obtain the iteration count.
+A Mandelbrot set library in C++17 featuring optional OpenMP and AVX2/AVX512 support. It uses the escape-time algorithm to obtain the iteration count.
 
 ---
 
@@ -8,6 +8,8 @@ A Mandelbrot set library in C++20 featuring optional OpenMP and AVX2/AVX512 supp
 The Mandelbrot set has fascinated me for two reasons:
 1. Emergent behavior: Simple iterative rules giving rise to complex patterns is beautiful.
 2. Potential for beautiful visualizations: Apart from the mathematical beauty of the Mandelbrot set, it allows for endless visualization strategies that produce stunning and colorful images.
+
+Apart from these, the problem lends itself nicely to vectorization and multithreading. This allows for seeing the benefits provided by these concepts.
 
 ---
 
@@ -20,7 +22,7 @@ The Mandelbrot set has fascinated me for two reasons:
 ---
 
 ## Requirements
-* A compiler with C++20 support.
+* A compiler with C++17 support.
 * CMake 3.31+ for ease-of-building.
 * Optional:
   * A compiler supporting OpenMP to enable the OpenMP implementations.
@@ -37,6 +39,14 @@ cd Mandelbrot
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
+
+### Build options
+**Option** | **Default** | **Description** |
+--- | --- | --- |
+`BUILD_BENCHMARKS` | `OFF` | Build performance benchmarks using Google Benchmark. |
+`BUILD_EXAMPLES` | `OFF` | Build example programs demonstrating how to use the library. |
+`ENABLE_OMP` | `ON` | Enable the OpenMP-based parallel implementations |
+`USE_FAST_MATH` | `ON` | Enable the `-ffast-math` compiler option to improve performance. It comes at the cost of strict IEEE floating-point compliance.|
 
 ### Installing the library
 Once the library has been built, you can install the library using the following:
@@ -87,7 +97,7 @@ int main() {
   // Print the iteration count for each pixel.
   for (std::size_t row = 0; row < result.height(); ++row) {
     for (std::size_t col = 0; col < result.width(); ++col) {
-      std::cout << result[row][col].iteration << '\n';
+      std::cout << result(row, col).iteration << '\n';
     }
   }
   return 0;
@@ -99,7 +109,9 @@ This example uses the serial implementation to generate the Mandelbrot set for a
 ### Examples
 For more examples, check out the `examples` directory.
 To build the examples, add `-DBUILD_EXAMPLES=ON` while building the library.
-For ease-of-use, the examples do require OpenCV to be installed.
+
+> [!IMPORTANT]
+> For ease-of-use, the examples do require OpenCV to be installed.
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
@@ -161,4 +173,4 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 ## Notes
 
 * All implementations other than the serial implementation have been guarded by their appropriate compile-time checks.
-* Runtime checks are ran for implementations depending on specific CPU support, such as the AVX2 implementations. It will fallback to the serial implementation. This is to prevent crashing due to unsupported instructions if the compiler has been set to still generate those instructions.
+* Runtime checks are performed for implementations depending on specific CPU support, such as the AVX2 implementations. This is to prevent crashing due to unsupported instructions if the compiler has been set to still generate those instructions. Instead it will throw a runtime error that can be caught.

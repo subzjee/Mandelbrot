@@ -9,6 +9,14 @@ set(SOURCE_FILES
     utility_avx512.cpp
 )
 
-add_library(mandelbrot ${SOURCE_FILES})
-target_include_directories(mandelbrot PUBLIC ../include)
+add_library(mandelbrot)
+target_sources(mandelbrot PRIVATE ${SOURCE_FILES})
+target_include_directories(mandelbrot
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
 configure_target(mandelbrot)
+
+if(ENABLE_OMP)
+    target_link_libraries(mandelbrot PRIVATE OpenMP::OpenMP_CXX)
+endif()
