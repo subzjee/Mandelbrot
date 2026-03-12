@@ -15,7 +15,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 function(configure_target target)
-    target_compile_options(${target} PRIVATE -Wall -Wextra -Wconversion -O3 -march=native -flto=auto)
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Wconversion -march=native -flto=auto)
     target_link_options(${target} PRIVATE -flto=auto)
 
     if(USE_FAST_MATH)
