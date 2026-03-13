@@ -184,7 +184,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 
 ## Future work
 * Runtime dispatch to select the best implementation.
-* CUDA/HIP/SYCL support for GPU acceleration.
+* HIP/SYCL support for GPU acceleration.
 * MSVC support.
 
 ---
