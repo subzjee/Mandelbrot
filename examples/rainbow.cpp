@@ -29,7 +29,7 @@ constexpr float
 int main() {
   cv::Mat pixels(height * ssaa_factor, width * ssaa_factor, CV_8UC3);
 
-  auto renderer = create_renderer<Backend::CUDA>(width * ssaa_factor, height * ssaa_factor, {real_min, real_max, imag_min, imag_max}, max_iterations);
+  auto renderer = create_renderer(width * ssaa_factor, height * ssaa_factor, {real_min, real_max, imag_min, imag_max}, max_iterations);
 
   MandelbrotResult iterations = renderer->render();
 
