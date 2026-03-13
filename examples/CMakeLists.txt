@@ -9,4 +9,8 @@ foreach(EXAMPLE greyscale rainbow)
   if(ENABLE_OMP)
     target_link_libraries(${EXAMPLE} PRIVATE OpenMP::OpenMP_CXX)
   endif()
+
+  if(ENABLE_GPU)
+    target_compile_definitions(${EXAMPLE} PRIVATE ENABLE_GPU)
+  endif()
 endforeach()

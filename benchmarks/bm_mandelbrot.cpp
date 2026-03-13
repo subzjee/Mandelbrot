@@ -9,14 +9,19 @@
 
 #include "benchmark/benchmark.h"
 
+#if defined(ENABLE_GPU)
+#include <cuda_runtime.h>
+#endif
+
 #include "mandelbrot.hpp"
 #include "mandelbrot_result.hpp"
+#include "utility.hpp"
 
 constexpr float real_min = -2.0f, real_max = 1.0f;
 constexpr float imag_min = -1.0f, imag_max = 1.0f;
 constexpr unsigned int max_iter = 1000;
 
-enum class Target { Generic, AVX2, AVX512F };
+enum class Target { Generic, AVX2, AVX512F, CUDA };
 
 template <Target target> struct ExecutionConfig {
   static bool is_available() {
@@ -27,6 +32,16 @@ template <Target target> struct ExecutionConfig {
       return __builtin_cpu_supports("avx2");
     case Target::AVX512F:
       return __builtin_cpu_supports("avx512f");
+    case Target::CUDA:
+#if defined(ENABLE_GPU)
+    {
+      int device_count{0};
+      cudaError_t err = cudaGetDeviceCount(&device_count);
+      return (err == cudaSuccess && device_count > 0);
+    }
+#else
+      return false;
+#endif
     }
   }
 
@@ -38,6 +53,8 @@ template <Target target> struct ExecutionConfig {
       return "AVX2";
     case Target::AVX512F:
       return "AVX512F";
+    case Target::CUDA:
+      return "CUDA";
     }
   }
 };
@@ -90,6 +107,10 @@ MANDEL_BENCH("AVX512", mandelbrot_avx512, Target::AVX512F)
 
 #if defined(__AVX512F__) && defined(_OPENMP)
 MANDEL_BENCH("AVX512_OMP", mandelbrot_avx512_omp, Target::AVX512F)
+#endif
+
+#if defined(ENABLE_GPU)
+MANDEL_BENCH("CUDA", mandelbrot_cuda, Target::CUDA);
 #endif
 
 BENCHMARK_MAIN();

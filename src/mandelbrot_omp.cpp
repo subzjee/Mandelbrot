@@ -16,30 +16,30 @@ MandelbrotResult mandelbrot_omp(const std::size_t width,
                                 const float imag_max,
                                 const unsigned int max_iterations) {
   auto iterations = std::make_unique<unsigned int[]>(width * height);
-  auto z_imag = std::make_unique<float[]>(width * height);
-  auto z_real = std::make_unique<float[]>(width * height);
+  auto z_imags = std::make_unique<float[]>(width * height);
+  auto z_reals = std::make_unique<float[]>(width * height);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < height; ++row) {
     for (std::size_t col = 0; col < width; ++col) {
-      std::complex<float> z{0.0, 0.0};
+      std::complex<float> z{0.0f, 0.0f};
       const std::complex<float> c = utility::detail::mapPixelToComplexPlane(
           row, col, width, height, real_min, real_max, imag_min, imag_max);
 
       unsigned int iteration{0};
-      while (std::norm(z) <= 4.0 && iteration < max_iterations) {
+      while (std::norm(z) <= 4.0f && iteration < max_iterations) {
         z = z * z + c;
 
         ++iteration;
       }
 
       iterations[row * width + col] = iteration;
-      z_real[row * width + col] = z.real();
-      z_imag[row * width + col] = z.imag();
+      z_reals[row * width + col] = z.real();
+      z_imags[row * width + col] = z.imag();
     }
   }
 
-  return {std::move(iterations), std::move(z_real), std::move(z_imag), width,
+  return {std::move(iterations), std::move(z_reals), std::move(z_imags), width,
           height};
 }
 

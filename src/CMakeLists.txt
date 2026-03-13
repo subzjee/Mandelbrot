@@ -1,9 +1,6 @@
 set(SOURCE_FILES
     mandelbrot_avx2.cpp
-    mandelbrot_avx2_omp.cpp
     mandelbrot_avx512.cpp
-    mandelbrot_avx512_omp.cpp
-    mandelbrot_omp.cpp
     mandelbrot_serial.cpp
     utility_avx.cpp
     utility_avx512.cpp
@@ -18,5 +15,13 @@ target_include_directories(mandelbrot
 configure_target(mandelbrot)
 
 if(ENABLE_OMP)
-    target_link_libraries(mandelbrot PRIVATE OpenMP::OpenMP_CXX)
+    target_sources(mandelbrot PRIVATE mandelbrot_omp.cpp mandelbrot_avx2_omp.cpp mandelbrot_avx512_omp.cpp)
+    target_link_libraries(mandelbrot PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
+if(ENABLE_GPU)
+    find_package(CUDAToolkit REQUIRED)
+    target_sources(mandelbrot PRIVATE mandelbrot_cuda.cu)
+    target_link_libraries(mandelbrot PUBLIC CUDA::cudart)
+    target_compile_definitions(mandelbrot PUBLIC ENABLE_GPU)
 endif()

@@ -20,6 +20,13 @@ if(ENABLE_OMP)
     target_link_libraries(bm_mandelbrot PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
+if(ENABLE_GPU)
+    find_package(CUDAToolkit REQUIRED)
+
+    target_include_directories(bm_mandelbrot PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+    target_compile_definitions(bm_mandelbrot PRIVATE ENABLE_GPU)
+endif()
+
 add_custom_target(run_benchmarks
     COMMAND bm_mandelbrot
     DEPENDS bm_mandelbrot

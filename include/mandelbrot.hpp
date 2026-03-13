@@ -51,3 +51,11 @@ mandelbrot_avx512_omp(const std::size_t width, const std::size_t height,
                       const float imag_min, const float imag_max,
                       const unsigned int max_iterations);
 #endif
+
+#if defined(ENABLE_GPU)
+MandelbrotResult mandelbrot_cuda(const std::size_t width,
+                                 const std::size_t height, const float real_min,
+                                 const float real_max, const float imag_min,
+                                 const float imag_max,
+                                 const unsigned int max_iterations);
+#endif
