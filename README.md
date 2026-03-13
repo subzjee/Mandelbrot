@@ -95,7 +95,7 @@ Then, you can include the header and use the library as shown below:
 #include "mandelbrot_renderer.hpp"
 
 int main() {
-  auto renderer = create_renderer(1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000);
+  auto renderer = create_renderer<Backend::Serial>(1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000);
   MandelbrotResult result = renderer->render();
   
   // Print the iteration count for each pixel.
@@ -109,6 +109,20 @@ int main() {
 ```
 
 This example uses the serial implementation to generate the Mandelbrot set for a 1920x1080 image. The complex plane is bounded by [-2.0, 1.0] for the real axis and [-1.0, 1.0] for the imaginary axis, with a maximum of 1000 iterations per pixel.
+
+The renderer has several backends that it can be templated on.
+
+**Backends** | **Description** |
+--- | --- |
+`Serial` | Default when a template parameter is not given. |
+`OMP` | OpenMP parallelization |
+`AVX2` | AVX2 vectorization |
+`AVX2_OMP` | AVX2 vectorization with OpenMP parallelization
+`AVX512` | AVX512 vectorization |
+`AVX512_OMP` | AVX512 vectorization with OpenMP parallelization|
+`CUDA` | CUDA acceleration |
+
+The available backends depend on compiler configuration while building. Runtime checks are performed for backends that depend on specific hardware capabilities.
 
 ### Examples
 For more examples, check out the `examples` directory.
@@ -141,7 +155,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 │   ├── bm_mandelbrot.cpp           # Benchmarks
 │   └── CMakeLists.txt
 ├── cmake
-│   └── mandelbrotConfig.cmake      # Config for `find_package`
+│   └── mandelbrotConfig.cmake.in   # Config for `find_package`
 ├── CMakeLists.txt                  # Root CMake file
 ├── examples
 │   ├── CMakeLists.txt
@@ -177,5 +191,5 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 
 ## Notes
 
-* All implementations other than the serial implementation have been guarded by their appropriate compile-time checks.
-* Runtime checks are performed for implementations depending on specific CPU support, such as the AVX2 implementations. This is to prevent crashing due to unsupported instructions if the compiler has been set to still generate those instructions. Instead it will throw a runtime error that can be caught.
+* All implementations other than the serial implementation have been compile-time guarded.
+* Runtime checks are performed for implementations depending on specific hardware support. This is to prevent crashing due to unsupported instructions if the compiler has been set to still generate those instructions. Instead it will throw a runtime error that can be caught.
