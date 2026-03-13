@@ -1,5 +1,5 @@
 # **Mandelbrot**
-A Mandelbrot set library in C++17 featuring optional OpenMP and AVX2/AVX512 support. It uses the escape-time algorithm to obtain the iteration count.
+A Mandelbrot set library in C++20 featuring optional OpenMP, AVX2/AVX512 and GPU support. It uses the escape-time algorithm to obtain the iteration count.
 
 ---
 
@@ -17,18 +17,20 @@ Apart from these, the problem lends itself nicely to vectorization and multithre
 * Serial implementation for a simple and portable fallback.
 * Parallel processing with OpenMP for multicore acceleration.
 * Vectorization support with AVX2/AVX512 for capable CPUs.
+* CUDA support for GPU acceleration on Nvidia GPUs.
 * Works with CMake and is installable as a library.
 
 ---
 
 ## Requirements
-* A compiler with C++17 support.
+* A compiler with C++20 support.
 * CMake 3.31+ for ease-of-building.
 * Optional:
   * A compiler supporting OpenMP to enable the OpenMP implementations.
   * A compiler supporting x86/x86-64 SIMD intrinsics to enable the AVX* implementations.
   * AVX2-capable CPU to use the AVX2 implementations.
   * AVX512-capable CPU to use the AVX512 implementations.
+  * Nvidia GPU to use the CUDA implementation.
 
 ---
 
@@ -46,6 +48,7 @@ cmake --build build
 `BUILD_BENCHMARKS` | `OFF` | Build performance benchmarks using Google Benchmark. |
 `BUILD_EXAMPLES` | `OFF` | Build example programs demonstrating how to use the library. |
 `ENABLE_OMP` | `ON` | Enable the OpenMP-based parallel implementations |
+`ENABLE_CUDA` | `OFF` | Enable CUDA-accelerated implementation
 `USE_FAST_MATH` | `ON` | Enable the `-ffast-math` compiler option to improve performance. It comes at the cost of strict IEEE floating-point compliance.|
 
 ### Installing the library
@@ -89,10 +92,11 @@ Then, you can include the header and use the library as shown below:
 ```cpp
 #include <iostream>
 
-#include "mandelbrot.hpp"
+#include "mandelbrot_renderer.hpp"
 
 int main() {
-  MandelbrotResult result = mandelbrot_serial(1920, 1080, -2.0f, 1.0f, -1.0f, 1.0f, 1000);
+  auto renderer = create_renderer(1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000);
+  MandelbrotResult result = renderer->render();
   
   // Print the iteration count for each pixel.
   for (std::size_t row = 0; row < result.height(); ++row) {
@@ -144,7 +148,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 │   ├── greyscale.cpp               # Greyscale example
 │   └── rainbow.cpp                 # RGB example
 ├── include           
-│   ├── mandelbrot.hpp              # Main functions
+│   ├── mandelbrot_renderer.hpp     # Renderer base classes
 │   ├── mandelbrot_result.hpp
 │   └── utility.hpp                 # Helper functions
 ├── LICENSE
@@ -155,6 +159,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
     ├── mandelbrot_avx2_omp.cpp     # AVX2 + OpenMP implementation
     ├── mandelbrot_avx512.cpp       # AVX512 implementation 
     ├── mandelbrot_avx512_omp.cpp   # AVX512 + OpenMP implementation 
+    ├── mandelbrot_cuda.cu          # CUDA implementation 
     ├── mandelbrot_omp.cpp          # OpenMP implementation
     ├── mandelbrot_serial.cpp       # Serial implementation
     ├── utility_avx.cpp             # AVX helper functions

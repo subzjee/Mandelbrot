@@ -6,38 +6,46 @@
 
 #include <immintrin.h>
 
-#include "mandelbrot.hpp"
+#include "mandelbrot_renderer.hpp"
 #include "mandelbrot_result.hpp"
 #include "utility.hpp"
 
-MandelbrotResult mandelbrot_avx512(const std::size_t width,
-                                   const std::size_t height,
-                                   const float real_min, const float real_max,
-                                   const float imag_min, const float imag_max,
-                                   const unsigned int max_iterations) {
-  if (!__builtin_cpu_supports("avx512f")) {
+/*
+ * Check whether the AVX512 backend is available.
+ *
+ * @returns Whether the AVX512 backend is available.
+ */
+template<>
+bool CPURenderer<Backend::AVX512>::is_available() const {
+  return __builtin_cpu_supports("avx512f");
+}
+
+/*
+ * Render a frame with AVX512 acceleration.
+ *
+ * @returns The resulting frame.
+ */
+template <>
+MandelbrotResult CPURenderer<Backend::AVX512>::render() {
+  if (!is_available()) {
     throw std::runtime_error("AVX512 not supported on this CPU.");
   }
 
   constexpr std::size_t lanes =
       utility::avx512::simd_width_bytes / sizeof(float);
 
-  auto iterations = std::make_unique<unsigned int[]>(width * height);
-  auto z_reals = std::make_unique<float[]>(width * height);
-  auto z_imags = std::make_unique<float[]>(width * height);
-
-  for (std::size_t row = 0; row < height; ++row) {
-    for (std::size_t col = 0; col < width; col += lanes) {
+  for (std::size_t row = 0; row < m_height; ++row) {
+    for (std::size_t col = 0; col < m_width; col += lanes) {
       const auto [c_real, c_imag] =
           utility::avx512::detail::mapPixelsToComplexPlane(
-              row, col, width, height, real_min, real_max, imag_min, imag_max);
+              row, col, m_width, m_height, m_bounds.real_min, m_bounds.real_max, m_bounds.imag_min, m_bounds.imag_max);
 
       __m512 z_real = _mm512_setzero_ps();
       __m512 z_imag = _mm512_setzero_ps();
 
       __m512i iter_counts = _mm512_setzero_epi32();
 
-      for (unsigned int i = 0; i < max_iterations; ++i) {
+      for (unsigned int i = 0; i < m_max_iterations; ++i) {
         const __m512 norm = utility::avx512::detail::norm(z_real, z_imag);
 
         // Check which pixels have not escaped yet.
@@ -69,19 +77,19 @@ MandelbrotResult mandelbrot_avx512(const std::size_t width,
         z_imag = _mm512_mask_blend_ps(active, z_imag, z_imag_new);
       }
 
-      const std::size_t base_idx = row * width + col;
-      const std::size_t remaining = std::min(lanes, width - col);
+      const std::size_t base_idx = row * m_width + col;
+      const std::size_t remaining = std::min(lanes, m_width - col);
       const __mmask16 store_mask =
           (remaining == lanes) ? 0xFFFF : (1 << remaining) - 1;
 
-      _mm512_mask_storeu_ps(&z_reals[base_idx], store_mask, z_real);
-      _mm512_mask_storeu_ps(&z_imags[base_idx], store_mask, z_imag);
-      _mm512_mask_storeu_epi32(&iterations[base_idx], store_mask, iter_counts);
+      _mm512_mask_storeu_ps(&m_z_reals[base_idx], store_mask, z_real);
+      _mm512_mask_storeu_ps(&m_z_imags[base_idx], store_mask, z_imag);
+      _mm512_mask_storeu_epi32(&m_iterations[base_idx], store_mask, iter_counts);
     }
   }
 
-  return {std::move(iterations), std::move(z_reals), std::move(z_imags), width,
-          height};
+  return {m_iterations, m_z_reals, m_z_imags, m_width,
+          m_height};
 }
 
 #endif

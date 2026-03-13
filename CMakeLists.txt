@@ -2,34 +2,33 @@ cmake_minimum_required(VERSION 3.31)
 
 option(BUILD_BENCHMARKS "Build Google Benchmark benchmarks" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
-option(ENABLE_OMP "Enable OpenMP" ON)
-option(ENABLE_GPU "Enable GPU acceleration" OFF)
+option(ENABLE_OMP "Enable OpenMP acceleration" ON)
+option(ENABLE_CUDA "Enable CUDA acceleration" OFF)
 option(USE_FAST_MATH "Use ffast-math compiler option" ON)
 
 set(MANDELBROT_HAS_OMP ${ENABLE_OMP} CACHE INTERNAL "Whether OpenMP was enabled")
-set(MANDELBROT_HAS_GPU ${ENABLE_GPU} CACHE INTERNAL "Whether GPU acceleration was enabled")
+set(MANDELBROT_HAS_CUDA ${ENABLE_CUDA} CACHE INTERNAL "Whether CUDA was enabled")
 
-if(ENABLE_GPU)
+if(ENABLE_CUDA)
     project(mandelbrot LANGUAGES CXX CUDA)
-    message(STATUS "Enabled GPU acceleration")
+    message(STATUS "Enabled CUDA acceleration")
 else()
     project(mandelbrot LANGUAGES CXX)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 function(configure_target target)
-    target_compile_options(${target} PRIVATE -Wall -Wextra -Wconversion -march=native -flto=auto)
-    target_link_options(${target} PRIVATE -flto=auto)
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Wconversion -march=native)
 
     if(USE_FAST_MATH)
         message(STATUS "Enabled fast math for ${target}")
         target_compile_options(${target} PRIVATE -ffast-math)
 
-        if(ENABLE_GPU)
+        if(ENABLE_CUDA)
             target_compile_options(${target} PRIVATE
                 $<$<COMPILE_LANGUAGE:CUDA>:--use_fast_math>
             )

@@ -11,7 +11,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "mandelbrot.hpp"
+#include "mandelbrot_renderer.hpp"
+#include "mandelbrot_result.hpp"
 
 constexpr std::size_t width = 1920, height = 1080;
 constexpr int max_iterations = 1000;
@@ -27,9 +28,8 @@ constexpr float
 int main() {
   cv::Mat pixels(height, width, CV_8UC1);
 
-  MandelbrotResult result =
-      mandelbrot_serial(pixels.cols, pixels.rows, real_min, real_max, imag_min,
-                        imag_max, max_iterations);
+  auto renderer = create_renderer(width, height, {real_min, real_max, imag_min, imag_max}, max_iterations);
+  MandelbrotResult result = renderer->render();
 
   for (std::size_t row = 0; row < pixels.rows; ++row) {
     for (std::size_t col = 0; col < pixels.cols; ++col) {

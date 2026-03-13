@@ -6,41 +6,51 @@
 
 #include <complex>
 
-#include "mandelbrot.hpp"
+#include "mandelbrot_renderer.hpp"
 #include "mandelbrot_result.hpp"
 #include "utility.hpp"
 
-MandelbrotResult mandelbrot_omp(const std::size_t width,
-                                const std::size_t height, const float real_min,
-                                const float real_max, const float imag_min,
-                                const float imag_max,
-                                const unsigned int max_iterations) {
-  auto iterations = std::make_unique<unsigned int[]>(width * height);
-  auto z_imags = std::make_unique<float[]>(width * height);
-  auto z_reals = std::make_unique<float[]>(width * height);
+/*
+ * Check whether the OpenMP backend is available.
+ *
+ * @returns Whether the OpenMP backend is available.
+ */
+template<>
+bool CPURenderer<Backend::OMP>::is_available() const {
+  return true;
+}
 
+/*
+ * Render a frame with OpenMP acceleration.
+ *
+ * @returns The resulting frame.
+ */
+template<>
+MandelbrotResult CPURenderer<Backend::OMP>::render() {
 #pragma omp parallel for collapse(2) schedule(guided)
-  for (std::size_t row = 0; row < height; ++row) {
-    for (std::size_t col = 0; col < width; ++col) {
+  for (std::size_t row = 0; row < m_height; ++row) {
+    for (std::size_t col = 0; col < m_width; ++col) {
       std::complex<float> z{0.0f, 0.0f};
       const std::complex<float> c = utility::detail::mapPixelToComplexPlane(
-          row, col, width, height, real_min, real_max, imag_min, imag_max);
+          row, col, m_width, m_height, m_bounds.real_min, m_bounds.real_max, m_bounds.imag_min, m_bounds.imag_max);
 
       unsigned int iteration{0};
-      while (std::norm(z) <= 4.0f && iteration < max_iterations) {
+      while (std::norm(z) <= 4.0f && iteration < m_max_iterations) {
         z = z * z + c;
 
         ++iteration;
       }
 
-      iterations[row * width + col] = iteration;
-      z_reals[row * width + col] = z.real();
-      z_imags[row * width + col] = z.imag();
+      const std::size_t idx = row * m_width + col;
+
+      m_iterations[idx] = iteration;
+      m_z_reals[idx] = z.real();
+      m_z_imags[idx] = z.imag();
     }
   }
 
-  return {std::move(iterations), std::move(z_reals), std::move(z_imags), width,
-          height};
+  return {m_iterations, m_z_reals, m_z_imags, m_width,
+          m_height};
 }
 
 #endif
