@@ -94,10 +94,10 @@ struct ViewBounds {
   float imag_min, imag_max;
 };
 
-class MandelbrotRenderer {
+class MandelbrotEngine {
 public:
-  virtual ~MandelbrotRenderer() = default;
-  virtual MandelbrotResult render() = 0;
+  virtual ~MandelbrotEngine() = default;
+  virtual MandelbrotResult compute() = 0;
   virtual bool is_available() const = 0;
   virtual Backend get_backend() const = 0;
 
@@ -110,7 +110,7 @@ public:
   const ViewBounds& bounds() const noexcept { return m_bounds; }
 
 protected:
-  MandelbrotRenderer(std::size_t width, std::size_t height,
+  MandelbrotEngine(std::size_t width, std::size_t height,
                      const ViewBounds& bounds, unsigned int max_iterations)
       : m_width{width}, m_height{height}, m_bounds{bounds}, m_max_iterations{max_iterations} {};
 
@@ -122,25 +122,25 @@ protected:
 
 template <Backend backend>
   requires CPUBackend<backend>
-class CPURenderer : public MandelbrotRenderer {
+class CPUEngine : public MandelbrotEngine {
 public:
-  CPURenderer(std::size_t width, std::size_t height, const ViewBounds& bounds,
+  CPUEngine(std::size_t width, std::size_t height, const ViewBounds& bounds,
               unsigned int max_iterations)
-      : MandelbrotRenderer(width, height, bounds, max_iterations) {
+  : MandelbrotEngine(width, height, bounds, max_iterations) {
     m_iterations = std::make_shared<unsigned int[]>(width * height);
     m_z_reals = std::make_shared<float[]>(width * height);
     m_z_imags = std::make_shared<float[]>(width * height);
   };
 
-  ~CPURenderer() = default;
+  ~CPUEngine() = default;
 
-  CPURenderer(const CPURenderer&) = delete;
-  CPURenderer& operator=(const CPURenderer&) = delete;
+  CPUEngine(const CPUEngine&) = delete;
+  CPUEngine& operator=(const CPUEngine&) = delete;
 
-  CPURenderer(CPURenderer&&) = default;
-  CPURenderer& operator=(CPURenderer&&) = default;
+  CPUEngine(CPUEngine&&) = default;
+  CPUEngine& operator=(CPUEngine&&) = default;
 
-  MandelbrotResult render() override;
+  MandelbrotResult compute() override;
   bool is_available() const override;
   Backend get_backend() const override {
     return backend;
@@ -153,11 +153,11 @@ private:
 };
 
 #if defined(ENABLE_CUDA)
-class CUDARenderer : public MandelbrotRenderer {
+class CUDAEngine : public MandelbrotEngine {
 public:
-  CUDARenderer(std::size_t width, std::size_t height, const ViewBounds& bounds,
+  CUDAEngine(std::size_t width, std::size_t height, const ViewBounds& bounds,
               unsigned int max_iterations)
-      : MandelbrotRenderer(width, height, bounds, max_iterations) {
+  : MandelbrotEngine(width, height, bounds, max_iterations) {
     m_h_iterations = std::make_shared<unsigned int[]>(width * height);
     m_h_z_reals = std::make_shared<float[]>(width * height);
     m_h_z_imags = std::make_shared<float[]>(width * height);
@@ -167,19 +167,19 @@ public:
     cudaMalloc(&m_d_z_imags, width * height * sizeof(float));
   };
 
-  ~CUDARenderer() {
+  ~CUDAEngine() {
     cudaFree(m_d_iterations);
     cudaFree(m_d_z_reals);
     cudaFree(m_d_z_imags);
   }
 
-  CUDARenderer(const CUDARenderer&) = delete;
-  CUDARenderer& operator=(const CUDARenderer&) = delete;
+  CUDAEngine(const CUDAEngine&) = delete;
+  CUDAEngine& operator=(const CUDAEngine&) = delete;
 
-  CUDARenderer(CUDARenderer&&) = default;
-  CUDARenderer& operator=(CUDARenderer&&) = default;
+  CUDAEngine(CUDAEngine&&) = default;
+  CUDAEngine& operator=(CUDAEngine&&) = default;
 
-  MandelbrotResult render() override;
+  MandelbrotResult compute() override;
   bool is_available() const override;
   Backend get_backend() const override {
     return Backend::CUDA;
@@ -197,7 +197,7 @@ private:
 #endif
 
 /*
- * Create a renderer for the specified backend.
+ * Create an engine for the specified backend.
  *
  * @tparam backend The backend to use.
  * @param width The width of the image.
@@ -205,19 +205,19 @@ private:
  * @param bounds The view bounds (real and imaginary axis limits).
  * @param max_iterations The maximum iterations per pixel.
  *
- * @returns Renderer
+ * @returns The engine.
  */
 template <Backend backend = Backend::Serial>
-std::unique_ptr<MandelbrotRenderer>
-create_renderer(const std::size_t width, const std::size_t height,
+std::unique_ptr<MandelbrotEngine>
+create_engine(const std::size_t width, const std::size_t height,
                 const ViewBounds& bounds, const unsigned int max_iterations) {
   if constexpr (CPUBackend<backend>) {
-    return std::make_unique<CPURenderer<backend>>(width, height, bounds,
+    return std::make_unique<CPUEngine<backend>>(width, height, bounds,
                                                   max_iterations);
   }
 #if defined(ENABLE_CUDA)
   else if constexpr (backend == Backend::CUDA) {
-    return std::make_unique<CUDARenderer>(width, height, bounds,
+    return std::make_unique<CUDAEngine>(width, height, bounds,
                                                    max_iterations);
   }
 #endif

@@ -92,11 +92,11 @@ Then, you can include the header and use the library as shown below:
 ```cpp
 #include <iostream>
 
-#include "mandelbrot_renderer.hpp"
+#include "mandelbrot_engine.hpp"
 
 int main() {
-  auto renderer = create_renderer<Backend::Serial>(1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000);
-  MandelbrotResult result = renderer->render();
+  auto engine = create_engine<Backend::Serial>(1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000);
+  MandelbrotResult result = engine->compute();
   
   // Print the iteration count for each pixel.
   for (std::size_t row = 0; row < result.height(); ++row) {
@@ -110,7 +110,7 @@ int main() {
 
 This example uses the serial implementation to generate the Mandelbrot set for a 1920x1080 image. The complex plane is bounded by [-2.0, 1.0] for the real axis and [-1.0, 1.0] for the imaginary axis, with a maximum of 1000 iterations per pixel.
 
-The renderer has several backends that it can be templated on.
+The engine has several backends that it can be templated on.
 
 **Backends** | **Description** |
 --- | --- |
@@ -162,7 +162,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 │   ├── greyscale.cpp               # Greyscale example
 │   └── rainbow.cpp                 # RGB example
 ├── include           
-│   ├── mandelbrot_renderer.hpp     # Renderer base classes
+│   ├── mandelbrot_engine.hpp       # Engine base classes
 │   ├── mandelbrot_result.hpp
 │   └── utility.hpp                 # Helper functions
 ├── LICENSE

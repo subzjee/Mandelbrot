@@ -13,8 +13,7 @@
 #include <cuda_runtime.h>
 #endif
 
-#include "mandelbrot_renderer.hpp"
-#include "mandelbrot_result.hpp"
+#include "mandelbrot_engine.hpp"
 
 const ViewBounds bounds{-2.0f, 1.0f, -1.0f, 1.0f};
 constexpr unsigned int max_iter = 1000;
@@ -24,15 +23,15 @@ void BM_Mandelbrot(benchmark::State& state) {
   const std::size_t width = static_cast<std::size_t>(state.range(0));
   const std::size_t height = static_cast<std::size_t>(state.range(1));
 
-  auto renderer = create_renderer<backend>(width, height, bounds, max_iter);
+  auto engine = create_engine<backend>(width, height, bounds, max_iter);
 
-  if (!renderer || !renderer->is_available()) {
+  if (!engine || !engine->is_available()) {
     state.SkipWithError(std::format("Backend {} not available", to_string(backend)));
     return;
   }
 
   for (auto _ : state) {
-    auto result = renderer->render();
+    auto result = engine->compute();
   }
 }
 

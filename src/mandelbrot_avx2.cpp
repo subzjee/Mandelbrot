@@ -6,8 +6,7 @@
 
 #include <immintrin.h>
 
-#include "mandelbrot_renderer.hpp"
-#include "mandelbrot_result.hpp"
+#include "mandelbrot_engine.hpp"
 #include "utility.hpp"
 
 /*
@@ -16,17 +15,17 @@
  * @returns Whether the AVX2 backend is available.
  */
 template<>
-bool CPURenderer<Backend::AVX2>::is_available() const {
+bool CPUEngine<Backend::AVX2>::is_available() const {
   return __builtin_cpu_supports("avx2");
 }
 
 /*
- * Render a frame with AVX2 acceleration.
+ * Compute the Mandelbrot set with AVX2 acceleration.
  *
- * @returns The resulting frame.
+ * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template<>
-MandelbrotResult CPURenderer<Backend::AVX2>::render() {
+MandelbrotResult CPUEngine<Backend::AVX2>::compute() {
   if (!is_available()) {
     throw std::runtime_error("AVX2 not supported on this CPU.");
   }

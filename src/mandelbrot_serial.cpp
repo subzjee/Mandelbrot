@@ -4,8 +4,7 @@
 
 #include <complex>
 
-#include "mandelbrot_renderer.hpp"
-#include "mandelbrot_result.hpp"
+#include "mandelbrot_engine.hpp"
 #include "utility.hpp"
 
 /*
@@ -14,17 +13,17 @@
  * @returns Whether the serial backend is available.
  */
 template <>
-bool CPURenderer<Backend::Serial>::is_available() const {
+bool CPUEngine<Backend::Serial>::is_available() const {
   return true;
 }
 
 /*
- * Render a frame.
+ * Compute the Mandelbrot set.
  *
- * @returns The resulting frame.
+ * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template <>
-MandelbrotResult CPURenderer<Backend::Serial>::render() {
+MandelbrotResult CPUEngine<Backend::Serial>::compute() {
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; ++col) {
       std::complex<float> z{0.0f, 0.0f};

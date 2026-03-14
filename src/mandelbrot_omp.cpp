@@ -6,8 +6,7 @@
 
 #include <complex>
 
-#include "mandelbrot_renderer.hpp"
-#include "mandelbrot_result.hpp"
+#include "mandelbrot_engine.hpp"
 #include "utility.hpp"
 
 /*
@@ -16,17 +15,17 @@
  * @returns Whether the OpenMP backend is available.
  */
 template<>
-bool CPURenderer<Backend::OMP>::is_available() const {
+bool CPUEngine<Backend::OMP>::is_available() const {
   return true;
 }
 
 /*
- * Render a frame with OpenMP acceleration.
+ * Compute the Mandelbrot set with OpenMP acceleration.
  *
- * @returns The resulting frame.
+ * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template<>
-MandelbrotResult CPURenderer<Backend::OMP>::render() {
+MandelbrotResult CPUEngine<Backend::OMP>::compute() {
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; ++col) {

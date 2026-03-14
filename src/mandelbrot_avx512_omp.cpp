@@ -6,8 +6,7 @@
 
 #include <immintrin.h>
 
-#include "mandelbrot_renderer.hpp"
-#include "mandelbrot_result.hpp"
+#include "mandelbrot_engine.hpp"
 #include "utility.hpp"
 
 /*
@@ -16,17 +15,17 @@
  * @returns Whether the AVX512 + OpenMP backend is available.
  */
 template<>
-bool CPURenderer<Backend::AVX512_OMP>::is_available() const {
+bool CPUEngine<Backend::AVX512_OMP>::is_available() const {
   return __builtin_cpu_supports("avx512f");
 }
 
 /*
- * Render a frame with AVX512 + OpenMP acceleration.
+ * Compute the Mandelbrot set with AVX512 + OpenMP acceleration.
  *
- * @returns The resulting frame.
+ * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template<>
-MandelbrotResult CPURenderer<Backend::AVX512_OMP>::render() {
+MandelbrotResult CPUEngine<Backend::AVX512_OMP>::compute() {
   if (!is_available()) {
     throw std::runtime_error("AVX512 not supported on this CPU.");
   }

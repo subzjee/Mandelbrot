@@ -11,8 +11,7 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/opencv.hpp>
 
-#include "mandelbrot_renderer.hpp"
-#include "mandelbrot_result.hpp"
+#include "mandelbrot_engine.hpp"
 
 constexpr std::size_t width = 1920, height = 1080;
 constexpr unsigned int ssaa_factor = 4;
@@ -29,9 +28,9 @@ constexpr float
 int main() {
   cv::Mat pixels(height * ssaa_factor, width * ssaa_factor, CV_8UC3);
 
-  auto renderer = create_renderer(width * ssaa_factor, height * ssaa_factor, {real_min, real_max, imag_min, imag_max}, max_iterations);
+  auto engine = create_engine(width * ssaa_factor, height * ssaa_factor, {real_min, real_max, imag_min, imag_max}, max_iterations);
 
-  MandelbrotResult iterations = renderer->render();
+  MandelbrotResult iterations = engine->compute();
 
   for (std::size_t row = 0; row < pixels.rows; ++row) {
     for (std::size_t col = 0; col < pixels.cols; ++col) {

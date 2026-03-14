@@ -7,8 +7,7 @@
 #include <cuda/std/complex>
 #include <cuda_runtime.h>
 
-#include "mandelbrot_renderer.hpp"
-#include "mandelbrot_result.hpp"
+#include "mandelbrot_engine.hpp"
 
 /*
  * CUDA device kernel that performs the calculation.
@@ -59,7 +58,7 @@ __global__ void mandelbrot_cuda_kernel(
  *
  * @Whether the CUDA backend is available.
  */
-bool CUDARenderer::is_available() const {
+bool CUDAEngine::is_available() const {
   int device_count{0};
   cudaError_t err = cudaGetDeviceCount(&device_count);
 
@@ -67,11 +66,11 @@ bool CUDARenderer::is_available() const {
 }
 
 /*
- * Render a frame with CUDA acceleration.
+ * Compute the Mandelbrot set with CUDA acceleration.
  *
- * @returns The resulting frame.
+ * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-MandelbrotResult CUDARenderer::render() {
+MandelbrotResult CUDAEngine::compute() {
   if (!is_available()) {
     throw std::runtime_error("CUDA not available.");
   }
