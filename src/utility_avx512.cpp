@@ -4,15 +4,15 @@
  * The header can be found in: include/utility.hpp
  */
 
-#if defined(__AVX512F__)
+#if defined(MANDELBROT_HAS_AVX512)
 
 #include "utility.hpp"
 
-namespace utility::avx512::detail {
+namespace utility::avx512 {
 __m512 mapRowToImagAxis(const std::size_t row, const std::size_t height,
                         const float imag_min, const float imag_max) {
   const float imag =
-      utility::detail::mapIndexToBoundedAxis(row, height, imag_max, imag_min);
+      utility::mapIndexToBoundedAxis(row, height, imag_max, imag_min);
 
   return _mm512_set1_ps(imag);
 }
@@ -48,5 +48,5 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
 
   return {reals, imags};
 }
-} // namespace utility::avx512::detail
+} // namespace utility::avx512
 #endif

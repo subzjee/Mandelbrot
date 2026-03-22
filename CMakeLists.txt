@@ -6,9 +6,6 @@ option(ENABLE_OMP "Enable OpenMP acceleration" ON)
 option(ENABLE_CUDA "Enable CUDA acceleration" OFF)
 option(USE_FAST_MATH "Use ffast-math compiler option" ON)
 
-set(MANDELBROT_HAS_OMP ${ENABLE_OMP} CACHE INTERNAL "Whether OpenMP was enabled")
-set(MANDELBROT_HAS_CUDA ${ENABLE_CUDA} CACHE INTERNAL "Whether CUDA was enabled")
-
 if(ENABLE_CUDA)
     project(mandelbrot LANGUAGES CXX CUDA)
     message(STATUS "Enabled CUDA acceleration")
@@ -21,18 +18,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(MANDELBROT_HAS_OMP ${ENABLE_OMP} "Whether OpenMP was enabled")
+set(MANDELBROT_HAS_CUDA ${ENABLE_CUDA} "Whether CUDA was enabled")
+
 function(configure_target target)
-    target_compile_options(${target} PRIVATE -Wall -Wextra -Wconversion -march=native)
+    target_compile_options(${target} PUBLIC
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wconversion -march=native -fno-lto>
+    )
+    target_link_options(${target} PRIVATE
+        $<$<COMPILE_LANGUAGE:CXX>:-fno-lto>
+    )
 
     if(USE_FAST_MATH)
         message(STATUS "Enabled fast math for ${target}")
-        target_compile_options(${target} PRIVATE -ffast-math)
+        target_compile_options(${target} PRIVATE
+            $<$<COMPILE_LANGUAGE:CXX>:-ffast-math>
+            $<$<COMPILE_LANGUAGE:CUDA>:--use_fast_math>
+        )
 
-        if(ENABLE_CUDA)
-            target_compile_options(${target} PRIVATE
-                $<$<COMPILE_LANGUAGE:CUDA>:--use_fast_math>
-            )
-        endif()
     endif()
 endfunction()
 
@@ -52,13 +55,13 @@ endif()
 
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mandelbrot)
 install(TARGETS mandelbrot
     EXPORT mandelbrotTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mandelbrot
 )
 install(EXPORT mandelbrotTargets
     FILE mandelbrotTargets.cmake

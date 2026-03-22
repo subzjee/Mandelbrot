@@ -2,7 +2,7 @@
  * This file contains the AVX512 implementation.
  */
 
-#if defined(__AVX512F__)
+#if defined(MANDELBROT_HAS_AVX512)
 
 #include <immintrin.h>
 
@@ -10,33 +10,19 @@
 #include "utility.hpp"
 
 /*
- * Check whether the AVX512 backend is available.
- *
- * @returns Whether the AVX512 backend is available.
- */
-template<>
-bool CPUEngine<Backend::AVX512>::is_available() const {
-  return __builtin_cpu_supports("avx512f");
-}
-
-/*
  * Compute the Mandelbrot set with AVX512 acceleration.
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template <>
-MandelbrotResult CPUEngine<Backend::AVX512>::compute() {
-  if (!is_available()) {
-    throw std::runtime_error("AVX512 not supported on this CPU.");
-  }
-
+MandelbrotResult MandelbrotEngine<Backend::AVX512>::compute() {
   constexpr std::size_t lanes =
       utility::avx512::simd_width_bytes / sizeof(float);
 
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; col += lanes) {
       const auto [c_real, c_imag] =
-          utility::avx512::detail::mapPixelsToComplexPlane(
+          utility::avx512::mapPixelsToComplexPlane(
               row, col, m_width, m_height, m_bounds.real_min, m_bounds.real_max, m_bounds.imag_min, m_bounds.imag_max);
 
       __m512 z_real = _mm512_setzero_ps();
@@ -45,7 +31,7 @@ MandelbrotResult CPUEngine<Backend::AVX512>::compute() {
       __m512i iter_counts = _mm512_setzero_epi32();
 
       for (unsigned int i = 0; i < m_max_iterations; ++i) {
-        const __m512 norm = utility::avx512::detail::norm(z_real, z_imag);
+        const __m512 norm = utility::avx512::norm(z_real, z_imag);
 
         // Check which pixels have not escaped yet.
         const __mmask16 active =

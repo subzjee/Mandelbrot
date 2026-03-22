@@ -2,11 +2,10 @@
  * This file contains the CUDA implementation.
  */
 
-#if defined(ENABLE_CUDA)
-
 #include <cuda/std/complex>
 #include <cuda_runtime.h>
 
+#include "backends.hpp"
 #include "mandelbrot_engine.hpp"
 
 /*
@@ -54,44 +53,27 @@ __global__ void mandelbrot_cuda_kernel(
 }
 
 /*
- * Check whether the CUDA backend is available.
- *
- * @Whether the CUDA backend is available.
- */
-bool CUDAEngine::is_available() const {
-  int device_count{0};
-  cudaError_t err = cudaGetDeviceCount(&device_count);
-
-  return (err == cudaSuccess && device_count > 0);
-}
-
-/*
  * Compute the Mandelbrot set with CUDA acceleration.
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-MandelbrotResult CUDAEngine::compute() {
-  if (!is_available()) {
-    throw std::runtime_error("CUDA not available.");
-  }
-
+template<>
+MandelbrotResult MandelbrotEngine<Backend::CUDA>::compute() {
   dim3 block_size(16, 16);
   dim3 grid_size((m_width + block_size.x + 1) / block_size.x,
                  (m_height + block_size.y + 1) / block_size.y);
 
   mandelbrot_cuda_kernel<<<grid_size, block_size>>>(
-      m_d_iterations, m_d_z_reals, m_d_z_imags, m_width, m_height, m_bounds.real_min, m_bounds.real_max,
+      m_device.iterations, m_device.z_reals, m_device.z_imags, m_width, m_height, m_bounds.real_min, m_bounds.real_max,
       m_bounds.imag_min, m_bounds.imag_max, m_max_iterations);
 
-  cudaMemcpy(m_h_iterations.get(), m_d_iterations,
+  cudaMemcpy(m_iterations.get(), m_device.iterations,
              m_width * m_height * sizeof(unsigned int), cudaMemcpyDeviceToHost);
-  cudaMemcpy(m_h_z_reals.get(), m_d_z_reals, m_width * m_height * sizeof(float),
+  cudaMemcpy(m_z_reals.get(), m_device.z_reals, m_width * m_height * sizeof(float),
              cudaMemcpyDeviceToHost);
-  cudaMemcpy(m_h_z_imags.get(), m_d_z_imags, m_width * m_height * sizeof(float),
+  cudaMemcpy(m_z_imags.get(), m_device.z_imags, m_width * m_height * sizeof(float),
              cudaMemcpyDeviceToHost);
 
-  return {m_h_iterations, m_h_z_reals, m_h_z_imags,
+  return {m_iterations, m_z_reals, m_z_imags,
           m_width, m_height};
 }
-
-#endif

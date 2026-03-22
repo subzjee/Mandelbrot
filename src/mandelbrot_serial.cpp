@@ -8,26 +8,16 @@
 #include "utility.hpp"
 
 /*
- * Check whether the serial backend is available.
- *
- * @returns Whether the serial backend is available.
- */
-template <>
-bool CPUEngine<Backend::Serial>::is_available() const {
-  return true;
-}
-
-/*
  * Compute the Mandelbrot set.
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template <>
-MandelbrotResult CPUEngine<Backend::Serial>::compute() {
+MandelbrotResult MandelbrotEngine<Backend::Serial>::compute() {
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; ++col) {
       std::complex<float> z{0.0f, 0.0f};
-      const std::complex<float> c = utility::detail::mapPixelToComplexPlane(
+      const std::complex<float> c = utility::mapPixelToComplexPlane(
           row, col, m_width, m_height, m_bounds.real_min, m_bounds.real_max, m_bounds.imag_min, m_bounds.imag_max);
 
       unsigned int iteration{0};

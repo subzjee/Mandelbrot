@@ -2,7 +2,7 @@
  * This file contains the AVX2 + OpenMP implementation.
  */
 
-#if defined(__AVX2__) && defined(_OPENMP)
+#if defined(MANDELBROT_HAS_AVX2) && defined(MANDELBROT_HAS_OMP)
 
 #include <immintrin.h>
 
@@ -10,33 +10,19 @@
 #include "utility.hpp"
 
 /*
- * Check whether the AVX2 + OpenMP backend is available.
- *
- * @returns Whether the AVX2 + OpenMP backend is available.
- */
-template<>
-bool CPUEngine<Backend::AVX2_OMP>::is_available() const {
-  return __builtin_cpu_supports("avx2");
-}
-
-/*
  * Compute the Mandelbrot set with AVX2 + OpenMP acceleration.
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template<>
-MandelbrotResult CPUEngine<Backend::AVX2_OMP>::compute() {
-  if (!is_available()) {
-    throw std::runtime_error("AVX2 not supported on this CPU.");
-  }
-
+MandelbrotResult MandelbrotEngine<Backend::AVX2_OMP>::compute() {
   constexpr std::size_t lanes = utility::avx::simd_width_bytes / sizeof(float);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; col += lanes) {
       const auto [c_real, c_imag] =
-          utility::avx::detail::mapPixelsToComplexPlane(
+          utility::avx::mapPixelsToComplexPlane(
               row, col, m_width, m_height, m_bounds.real_min, m_bounds.real_max, m_bounds.imag_min, m_bounds.imag_max);
 
       __m256 z_real = _mm256_setzero_ps();
@@ -45,7 +31,7 @@ MandelbrotResult CPUEngine<Backend::AVX2_OMP>::compute() {
       __m256i iter_counts = _mm256_setzero_si256();
 
       for (unsigned int i = 0; i < m_max_iterations; ++i) {
-        const __m256 norm = utility::avx::detail::norm(z_real, z_imag);
+        const __m256 norm = utility::avx::norm(z_real, z_imag);
 
         // Check which pixels have not escaped yet.
         const __m256 active =

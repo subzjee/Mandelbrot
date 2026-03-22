@@ -8,11 +8,11 @@
 
 #include "utility.hpp"
 
-namespace utility::avx::detail {
+namespace utility::avx {
 __m256 mapRowToImagAxis(const std::size_t row, const std::size_t height,
                         const float imag_min, const float imag_max) {
   const float imag =
-      utility::detail::mapIndexToBoundedAxis(row, height, imag_max, imag_min);
+      utility::mapIndexToBoundedAxis(row, height, imag_max, imag_min);
 
   return _mm256_set1_ps(imag);
 }
@@ -44,6 +44,6 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
 
   return {reals, imags};
 }
-} // namespace utility::avx::detail
+} // namespace utility::avx
 
 #endif

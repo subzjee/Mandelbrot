@@ -9,7 +9,6 @@
 #include <immintrin.h>
 
 namespace utility {
-namespace detail {
 /*
  * Map an index in a 1D structure to a bounded axis linearly.
  *
@@ -53,14 +52,12 @@ mapPixelToComplexPlane(const std::size_t row, const std::size_t col,
       mapIndexToBoundedAxis(row, height, imag_max, imag_min) // Imag axis
   };
 }
-} // namespace detail
 
 #if defined(__AVX__)
 namespace avx {
 constexpr unsigned int simd_width = 256; // The SIMD width in bits.
 constexpr unsigned int simd_width_bytes = simd_width / 8;
 
-namespace detail {
 /*
  * Map the columns of eight consecutive pixels in the same row starting at
  * column `col` to their real coordinates in the complex plane.
@@ -126,16 +123,14 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
 inline __m256 norm(const __m256 real, const __m256 imag) {
   return _mm256_add_ps(_mm256_mul_ps(real, real), _mm256_mul_ps(imag, imag));
 }
-} // namespace detail
 } // namespace avx
 #endif
 
-#if defined(__AVX512F__)
+#if defined(MANDELBROT_HAS_AVX512)
 namespace avx512 {
 constexpr unsigned int simd_width = 512; // The SIMD width in bits.
 constexpr unsigned int simd_width_bytes = simd_width / 8;
 
-namespace detail {
 /*
  * Map the columns of sixteen consecutive pixels in the same row starting at
  * column `col` to their real coordinates in the complex plane.
@@ -201,8 +196,6 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
 inline __m512 norm(const __m512 real, const __m512 imag) {
   return _mm512_add_ps(_mm512_mul_ps(real, real), _mm512_mul_ps(imag, imag));
 }
-} // namespace detail
 } // namespace avx512
-}
-
 #endif
+} // namespace utility

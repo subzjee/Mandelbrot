@@ -92,7 +92,7 @@ Then, you can include the header and use the library as shown below:
 ```cpp
 #include <iostream>
 
-#include "mandelbrot_engine.hpp"
+#include <mandelbrot/mandelbrot_engine.hpp>
 
 int main() {
   auto engine = create_engine<Backend::Serial>(1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000);
@@ -161,7 +161,8 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXAMPLES=ON
 │   ├── CMakeLists.txt
 │   ├── greyscale.cpp               # Greyscale example
 │   └── rainbow.cpp                 # RGB example
-├── include           
+├── include    
+│   ├── backends.hpp                # Engine backends
 │   ├── mandelbrot_engine.hpp       # Engine base classes
 │   ├── mandelbrot_result.hpp
 │   └── utility.hpp                 # Helper functions

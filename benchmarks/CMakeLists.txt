@@ -1,6 +1,11 @@
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
-set(BENCHMARK_ENABLE_LTO ON CACHE BOOL "" FORCE)
+
+if(ENABLE_CUDA)
+    set(BENCHMARK_ENABLE_LTO OFF CACHE BOOL "" FORCE)  # incompatible with nvcc objects
+else()
+    set(BENCHMARK_ENABLE_LTO OFF CACHE BOOL "" FORCE)
+endif()
 
 include(FetchContent)
 
@@ -16,15 +21,11 @@ add_dependencies(bm_mandelbrot mandelbrot)
 configure_target(bm_mandelbrot)
 target_link_libraries(bm_mandelbrot PRIVATE mandelbrot benchmark::benchmark)
 
-if(ENABLE_OMP)
-    target_link_libraries(bm_mandelbrot PRIVATE OpenMP::OpenMP_CXX)
-endif()
-
 if(ENABLE_CUDA)
     find_package(CUDAToolkit REQUIRED)
 
     target_include_directories(bm_mandelbrot PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-    target_compile_definitions(bm_mandelbrot PRIVATE ENABLE_CUDA)
+    set_target_properties(bm_mandelbrot PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
 endif()
 
 add_custom_target(run_benchmarks

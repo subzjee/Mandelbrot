@@ -2,88 +2,13 @@
 
 #include <cstddef>
 #include <memory>
-#include <string>
 
-#if defined(ENABLE_CUDA)
+#if defined(MANDELBROT_HAS_CUDA)
 #include <cuda_runtime.h>
 #endif
 
+#include "backends.hpp"
 #include "mandelbrot_result.hpp"
-
-enum class Backend {
-  Serial,
-#if defined(_OPENMP)
-  OMP,
-#endif
-#if defined(__AVX2__)
-  AVX2,
-#if defined(_OPENMP)
-  AVX2_OMP,
-#endif
-#endif
-#if defined(__AVX512F__)
-  AVX512,
-#if defined(_OPENMP)
-  AVX512_OMP,
-#endif
-#endif
-#if defined(ENABLE_CUDA)
-  CUDA,
-#endif
-};
-
-template <Backend backend>
-concept CPUBackend = (
-    backend == Backend::Serial
-#if defined(_OPENMP)
-    || backend == Backend::OMP
-#endif
-#if defined(__AVX2__)
-    || backend == Backend::AVX2
-#if defined(_OPENMP)
-    || backend == Backend::AVX2_OMP
-#endif
-#endif
-#if defined(__AVX512F__)
-    || backend == Backend::AVX512
-#if defined(_OPENMP)
-    || backend == Backend::AVX512_OMP
-#endif
-#endif
-    );
-
-inline std::string to_string(Backend backend) {
-  switch (backend) {
-  case Backend::Serial:
-    return "Serial";
-#if defined(_OPENMP)
-  case Backend::OMP:
-    return "OMP";
-#endif
-#if defined(__AVX2__)
-  case Backend::AVX2:
-    return "AVX2";
-#if defined(_OPENMP)
-  case Backend::AVX2_OMP:
-    return "AVX2 + OMP";
-#endif
-#endif
-#if defined(__AVX512F__)
-  case Backend::AVX512:
-    return "AVX512";
-#if defined(_OPENMP)
-  case Backend::AVX512_OMP:
-    return "AVX512 + OMP";
-#endif
-#endif
-#if defined(ENABLE_CUDA)
-  case Backend::CUDA:
-    return "CUDA";
-#endif
-  default:
-    return "Unknown";
-  }
-}
 
 struct ViewBounds {
   ViewBounds(float real_min, float real_max, float imag_min, float imag_max)
@@ -94,107 +19,94 @@ struct ViewBounds {
   float imag_min, imag_max;
 };
 
-class MandelbrotEngine {
-public:
-  virtual ~MandelbrotEngine() = default;
-  virtual MandelbrotResult compute() = 0;
-  virtual bool is_available() const = 0;
-  virtual Backend get_backend() const = 0;
-
-  void set_bounds(const ViewBounds& bounds) {
-    m_bounds = bounds;
-  }
-
-  std::size_t width() const noexcept { return m_width; }
-  std::size_t height() const noexcept { return m_height; }
-  const ViewBounds& bounds() const noexcept { return m_bounds; }
-
-protected:
-  MandelbrotEngine(std::size_t width, std::size_t height,
-                     const ViewBounds& bounds, unsigned int max_iterations)
-      : m_width{width}, m_height{height}, m_bounds{bounds}, m_max_iterations{max_iterations} {};
-
-  std::size_t m_width;
-  std::size_t m_height;
-  ViewBounds m_bounds;
-  unsigned int m_max_iterations;
+template <Backend backend> struct DeviceResources {
+  explicit DeviceResources(std::size_t) {};
 };
 
-template <Backend backend>
-  requires CPUBackend<backend>
-class CPUEngine : public MandelbrotEngine {
+#if defined(MANDELBROT_HAS_CUDA)
+template <> struct DeviceResources<Backend::CUDA> {
+  explicit DeviceResources(std::size_t size) {
+    cudaMalloc(&iterations, size * sizeof(unsigned int));
+    cudaMalloc(&z_reals, size * sizeof(float));
+    cudaMalloc(&z_imags, size * sizeof(float));
+  }
+
+  ~DeviceResources() {
+    cudaFree(iterations);
+    cudaFree(z_reals);
+    cudaFree(z_imags);
+  }
+
+  DeviceResources(const DeviceResources&) = delete;
+  DeviceResources& operator=(const DeviceResources&) = delete;
+
+  DeviceResources(DeviceResources&& other) noexcept
+      : iterations{std::exchange(other.iterations, nullptr)},
+        z_reals{std::exchange(other.z_reals, nullptr)},
+        z_imags{std::exchange(other.z_imags, nullptr)} {}
+
+  DeviceResources& operator=(DeviceResources&& other) noexcept {
+    if (this != &other) {
+      cudaFree(iterations);
+      cudaFree(z_reals);
+      cudaFree(z_imags);
+
+      iterations = std::exchange(other.iterations, nullptr);
+      z_reals = std::exchange(other.z_reals, nullptr);
+      z_imags = std::exchange(other.z_imags, nullptr);
+    }
+
+    return *this;
+  }
+
+  unsigned int* iterations;
+  float* z_reals;
+  float* z_imags;
+};
+#endif
+
+template <Backend backend> class MandelbrotEngine {
 public:
-  CPUEngine(std::size_t width, std::size_t height, const ViewBounds& bounds,
-              unsigned int max_iterations)
-  : MandelbrotEngine(width, height, bounds, max_iterations) {
+  MandelbrotEngine(std::size_t width, std::size_t height,
+                   const ViewBounds& bounds, unsigned int max_iterations)
+      : m_width{width}, m_height{height}, m_bounds{bounds},
+        m_max_iterations{max_iterations}, m_device{width * height} {
+    if (!is_available(backend)) {
+      throw std::runtime_error(to_string(backend) + " backend is not available.");
+    }
+
     m_iterations = std::make_shared<unsigned int[]>(width * height);
     m_z_reals = std::make_shared<float[]>(width * height);
     m_z_imags = std::make_shared<float[]>(width * height);
   };
 
-  ~CPUEngine() = default;
+  MandelbrotResult compute();
+  Backend get_backend() const { return backend; }
 
-  CPUEngine(const CPUEngine&) = delete;
-  CPUEngine& operator=(const CPUEngine&) = delete;
+  void set_bounds(const ViewBounds& bounds) { m_bounds = bounds; }
 
-  CPUEngine(CPUEngine&&) = default;
-  CPUEngine& operator=(CPUEngine&&) = default;
+  MandelbrotEngine(const MandelbrotEngine&) = delete;
+  MandelbrotEngine& operator=(const MandelbrotEngine&) = delete;
 
-  MandelbrotResult compute() override;
-  bool is_available() const override;
-  Backend get_backend() const override {
-    return backend;
-  }
+  MandelbrotEngine(MandelbrotEngine&&) = default;
+  MandelbrotEngine& operator=(MandelbrotEngine&&) = default;
+
+  std::size_t width() const noexcept { return m_width; }
+  std::size_t height() const noexcept { return m_height; }
+  const ViewBounds& bounds() const noexcept { return m_bounds; }
 
 private:
+  std::size_t m_width;
+  std::size_t m_height;
+  ViewBounds m_bounds;
+  unsigned int m_max_iterations;
+
   std::shared_ptr<unsigned int[]> m_iterations;
   std::shared_ptr<float[]> m_z_reals;
   std::shared_ptr<float[]> m_z_imags;
+
+  [[no_unique_address]] DeviceResources<backend> m_device;
 };
-
-#if defined(ENABLE_CUDA)
-class CUDAEngine : public MandelbrotEngine {
-public:
-  CUDAEngine(std::size_t width, std::size_t height, const ViewBounds& bounds,
-              unsigned int max_iterations)
-  : MandelbrotEngine(width, height, bounds, max_iterations) {
-    m_h_iterations = std::make_shared<unsigned int[]>(width * height);
-    m_h_z_reals = std::make_shared<float[]>(width * height);
-    m_h_z_imags = std::make_shared<float[]>(width * height);
-
-    cudaMalloc(&m_d_iterations, width * height * sizeof(unsigned int));
-    cudaMalloc(&m_d_z_reals, width * height * sizeof(float));
-    cudaMalloc(&m_d_z_imags, width * height * sizeof(float));
-  };
-
-  ~CUDAEngine() {
-    cudaFree(m_d_iterations);
-    cudaFree(m_d_z_reals);
-    cudaFree(m_d_z_imags);
-  }
-
-  CUDAEngine(const CUDAEngine&) = delete;
-  CUDAEngine& operator=(const CUDAEngine&) = delete;
-
-  CUDAEngine(CUDAEngine&&) = default;
-  CUDAEngine& operator=(CUDAEngine&&) = default;
-
-  MandelbrotResult compute() override;
-  bool is_available() const override;
-  Backend get_backend() const override {
-    return Backend::CUDA;
-  }
-
-private:
-  std::shared_ptr<unsigned int[]> m_h_iterations;
-  std::shared_ptr<float[]> m_h_z_reals;
-  std::shared_ptr<float[]> m_h_z_imags;
-
-  unsigned int* m_d_iterations;
-  float* m_d_z_reals;
-  float* m_d_z_imags;
-};
-#endif
 
 /*
  * Create an engine for the specified backend.
@@ -208,17 +120,9 @@ private:
  * @returns The engine.
  */
 template <Backend backend = Backend::Serial>
-std::unique_ptr<MandelbrotEngine>
+std::unique_ptr<MandelbrotEngine<backend>>
 create_engine(const std::size_t width, const std::size_t height,
-                const ViewBounds& bounds, const unsigned int max_iterations) {
-  if constexpr (CPUBackend<backend>) {
-    return std::make_unique<CPUEngine<backend>>(width, height, bounds,
-                                                  max_iterations);
-  }
-#if defined(ENABLE_CUDA)
-  else if constexpr (backend == Backend::CUDA) {
-    return std::make_unique<CUDAEngine>(width, height, bounds,
-                                                   max_iterations);
-  }
-#endif
-};
+              const ViewBounds& bounds, const unsigned int max_iterations) {
+  return std::make_unique<MandelbrotEngine<backend>>(width, height, bounds,
+                                                     max_iterations);
+}

@@ -5,13 +5,8 @@
  */
 
 #include <format>
-#include <string>
 
 #include "benchmark/benchmark.h"
-
-#if defined(ENABLE_GPU)
-#include <cuda_runtime.h>
-#endif
 
 #include "mandelbrot_engine.hpp"
 
@@ -25,7 +20,7 @@ void BM_Mandelbrot(benchmark::State& state) {
 
   auto engine = create_engine<backend>(width, height, bounds, max_iter);
 
-  if (!engine || !engine->is_available()) {
+  if (!engine || !is_available(backend)) {
     state.SkipWithError(std::format("Backend {} not available", to_string(backend)));
     return;
   }
@@ -48,27 +43,27 @@ void BM_Mandelbrot(benchmark::State& state) {
 
 MANDEL_BENCH(Serial)
 
-#if defined(_OPENMP)
+#if defined(MANDELBROT_HAS_OMP)
 MANDEL_BENCH(OMP)
 #endif
 
-#if defined(__AVX2__)
+#if defined(MANDELBROT_HAS_AVX2)
 MANDEL_BENCH(AVX2)
 #endif
 
-#if defined(__AVX2__) && defined(_OPENMP)
+#if defined(MANDELBROT_HAS_AVX2) && defined(MANDELBROT_HAS_OMP)
 MANDEL_BENCH(AVX2_OMP)
 #endif
 
-#if defined(__AVX512F__)
+#if defined(MANDELBROT_HAS_AVX512)
 MANDEL_BENCH(AVX512)
 #endif
 
-#if defined(__AVX512F__) && defined(_OPENMP)
+#if defined(MANDELBROT_HAS_AVX512) && defined(MANDELBROT_HAS_OMP)
 MANDEL_BENCH(AVX512_OMP)
 #endif
 
-#if defined(ENABLE_CUDA)
+#if defined(MANDELBROT_HAS_CUDA)
 MANDEL_BENCH(CUDA)
 #endif
 
