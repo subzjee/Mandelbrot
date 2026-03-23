@@ -12,13 +12,13 @@
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-template <>
-MandelbrotResult MandelbrotEngine<backend::serial>::compute() {
+template <> MandelbrotResult MandelbrotEngine<backend::serial>::compute() {
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; ++col) {
       std::complex<float> z{0.0f, 0.0f};
       const std::complex<float> c = utility::mapPixelToComplexPlane(
-          row, col, m_width, m_height, m_bounds.real_min, m_bounds.real_max, m_bounds.imag_min, m_bounds.imag_max);
+          row, col, m_width, m_height, m_bounds.real_min, m_bounds.real_max,
+          m_bounds.imag_min, m_bounds.imag_max);
 
       unsigned int iteration{0};
       while (std::norm(z) <= 4.0f && iteration < m_max_iterations) {
@@ -35,6 +35,5 @@ MandelbrotResult MandelbrotEngine<backend::serial>::compute() {
     }
   }
 
-  return {m_iterations, m_z_reals, m_z_imags, m_width,
-          m_height};
+  return {m_iterations, m_z_reals, m_z_imags, m_width, m_height};
 }

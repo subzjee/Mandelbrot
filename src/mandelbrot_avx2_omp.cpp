@@ -14,16 +14,15 @@
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-template<>
-MandelbrotResult MandelbrotEngine<backend::avx2_omp>::compute() {
+template <> MandelbrotResult MandelbrotEngine<backend::avx2_omp>::compute() {
   constexpr std::size_t lanes = backend::avx2::simd_width_bytes / sizeof(float);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; col += lanes) {
-      const auto [c_real, c_imag] =
-          utility::avx::mapPixelsToComplexPlane(
-              row, col, m_width, m_height, m_bounds.real_min, m_bounds.real_max, m_bounds.imag_min, m_bounds.imag_max);
+      const auto [c_real, c_imag] = utility::avx::mapPixelsToComplexPlane(
+          row, col, m_width, m_height, m_bounds.real_min, m_bounds.real_max,
+          m_bounds.imag_min, m_bounds.imag_max);
 
       __m256 z_real = _mm256_setzero_ps();
       __m256 z_imag = _mm256_setzero_ps();
@@ -76,9 +75,9 @@ MandelbrotResult MandelbrotEngine<backend::avx2_omp>::compute() {
       } else {
         // AVX2 doesn't have masked stores so we have to manually copy the
         // remaining elements if it doesn't fit perfectly in a lane.
-        alignas(utility::avx::simd_width_bytes) int lane_iters[lanes];
-        alignas(utility::avx::simd_width_bytes) float lane_real[lanes];
-        alignas(utility::avx::simd_width_bytes) float lane_imag[lanes];
+        alignas(backend::avx2::simd_width_bytes) int lane_iters[lanes];
+        alignas(backend::avx2::simd_width_bytes) float lane_real[lanes];
+        alignas(backend::avx2::simd_width_bytes) float lane_imag[lanes];
 
         _mm256_store_si256(reinterpret_cast<__m256i*>(lane_iters), iter_counts);
         _mm256_store_ps(lane_real, z_real);
@@ -93,8 +92,7 @@ MandelbrotResult MandelbrotEngine<backend::avx2_omp>::compute() {
     }
   }
 
-  return {m_iterations, m_z_reals, m_z_imags, m_width,
-          m_height};
+  return {m_iterations, m_z_reals, m_z_imags, m_width, m_height};
 }
 
 #endif

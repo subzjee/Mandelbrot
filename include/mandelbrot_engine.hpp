@@ -73,7 +73,8 @@ public:
       : m_width{width}, m_height{height}, m_bounds{bounds},
         m_max_iterations{max_iterations}, m_device{width * height} {
     if (!B::is_available()) {
-      throw std::runtime_error(std::format("{} backend is not available.", B::name()));
+      throw std::runtime_error(
+          std::format("{} backend is not available.", B::name()));
     }
 
     m_iterations = std::make_shared<unsigned int[]>(width * height);
@@ -124,5 +125,5 @@ std::unique_ptr<MandelbrotEngine<B>>
 create_engine(const std::size_t width, const std::size_t height,
               const ViewBounds& bounds, const unsigned int max_iterations) {
   return std::make_unique<MandelbrotEngine<B>>(width, height, bounds,
-                                                     max_iterations);
+                                               max_iterations);
 }
