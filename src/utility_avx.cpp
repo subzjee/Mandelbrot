@@ -4,7 +4,7 @@
  * The header can be found in: include/utility.hpp
  */
 
-#if defined(__AVX__)
+#if defined(MANDELBROT_HAS_AVX)
 
 #include "utility.hpp"
 
@@ -43,6 +43,10 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
   const __m256 imags = mapRowToImagAxis(row, height, imag_min, imag_max);
 
   return {reals, imags};
+}
+
+__m256 norm(const __m256 real, const __m256 imag) {
+  return _mm256_add_ps(_mm256_mul_ps(real, real), _mm256_mul_ps(imag, imag));
 }
 } // namespace utility::avx
 

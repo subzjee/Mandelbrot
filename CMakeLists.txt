@@ -23,10 +23,10 @@ set(MANDELBROT_HAS_CUDA ${ENABLE_CUDA} "Whether CUDA was enabled")
 
 function(configure_target target)
     target_compile_options(${target} PUBLIC
-        $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wconversion -march=native -fno-lto>
+        $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wextra -Wconversion -flto=auto>
     )
     target_link_options(${target} PRIVATE
-        $<$<COMPILE_LANGUAGE:CXX>:-fno-lto>
+        $<$<COMPILE_LANGUAGE:CXX>:-flto=auto>
     )
 
     if(USE_FAST_MATH)

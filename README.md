@@ -23,11 +23,10 @@ Apart from these, the problem lends itself nicely to vectorization and multithre
 ---
 
 ## Requirements
-* A compiler with C++20 support.
+* GCC/Clang with C++20 support.
 * CMake 3.31+ for ease-of-building.
 * Optional:
-  * A compiler supporting OpenMP to enable the OpenMP implementations.
-  * A compiler supporting x86/x86-64 SIMD intrinsics to enable the AVX* implementations.
+  * NVCC to compile the CUDA implementation.
   * AVX2-capable CPU to use the AVX2 implementations.
   * AVX512-capable CPU to use the AVX512 implementations.
   * Nvidia GPU to use the CUDA implementation.

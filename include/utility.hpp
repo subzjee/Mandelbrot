@@ -53,7 +53,7 @@ mapPixelToComplexPlane(const std::size_t row, const std::size_t col,
   };
 }
 
-#if defined(__AVX__)
+#if defined(MANDELBROT_HAS_AVX)
 namespace avx {
 constexpr unsigned int simd_width = 256; // The SIMD width in bits.
 constexpr unsigned int simd_width_bytes = simd_width / 8;
@@ -120,9 +120,7 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
  *
  * @returns The norms.
  */
-inline __m256 norm(const __m256 real, const __m256 imag) {
-  return _mm256_add_ps(_mm256_mul_ps(real, real), _mm256_mul_ps(imag, imag));
-}
+__m256 norm(const __m256 real, const __m256 imag);
 } // namespace avx
 #endif
 
@@ -193,9 +191,7 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
  *
  * @returns The norms.
  */
-inline __m512 norm(const __m512 real, const __m512 imag) {
-  return _mm512_add_ps(_mm512_mul_ps(real, real), _mm512_mul_ps(imag, imag));
-}
+__m512 norm(const __m512 real, const __m512 imag);
 } // namespace avx512
 #endif
 } // namespace utility

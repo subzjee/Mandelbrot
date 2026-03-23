@@ -48,5 +48,9 @@ mapPixelsToComplexPlane(const std::size_t row, const std::size_t col,
 
   return {reals, imags};
 }
+
+__m512 norm(const __m512 real, const __m512 imag) {
+  return _mm512_add_ps(_mm512_mul_ps(real, real), _mm512_mul_ps(imag, imag));
+}
 } // namespace utility::avx512
 #endif
