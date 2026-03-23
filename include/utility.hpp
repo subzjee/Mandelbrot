@@ -55,9 +55,6 @@ mapPixelToComplexPlane(const std::size_t row, const std::size_t col,
 
 #if defined(MANDELBROT_HAS_AVX)
 namespace avx {
-constexpr unsigned int simd_width = 256; // The SIMD width in bits.
-constexpr unsigned int simd_width_bytes = simd_width / 8;
-
 /*
  * Map the columns of eight consecutive pixels in the same row starting at
  * column `col` to their real coordinates in the complex plane.
@@ -126,9 +123,6 @@ __m256 norm(const __m256 real, const __m256 imag);
 
 #if defined(MANDELBROT_HAS_AVX512)
 namespace avx512 {
-constexpr unsigned int simd_width = 512; // The SIMD width in bits.
-constexpr unsigned int simd_width_bytes = simd_width / 8;
-
 /*
  * Map the columns of sixteen consecutive pixels in the same row starting at
  * column `col` to their real coordinates in the complex plane.

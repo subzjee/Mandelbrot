@@ -15,9 +15,9 @@
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template<>
-MandelbrotResult MandelbrotEngine<Backend::AVX512_OMP>::compute() {
+MandelbrotResult MandelbrotEngine<backend::avx512_omp>::compute() {
   constexpr std::size_t lanes =
-      utility::avx512::simd_width_bytes / sizeof(float);
+      backend::avx512::simd_width_bytes / sizeof(float);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < m_height; ++row) {

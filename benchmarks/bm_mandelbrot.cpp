@@ -13,15 +13,15 @@
 const ViewBounds bounds{-2.0f, 1.0f, -1.0f, 1.0f};
 constexpr unsigned int max_iter = 1000;
 
-template <Backend backend>
+template <Backend B>
 void BM_Mandelbrot(benchmark::State& state) {
   const std::size_t width = static_cast<std::size_t>(state.range(0));
   const std::size_t height = static_cast<std::size_t>(state.range(1));
 
-  auto engine = create_engine<backend>(width, height, bounds, max_iter);
+  auto engine = create_engine<B>(width, height, bounds, max_iter);
 
-  if (!engine || !is_available(backend)) {
-    state.SkipWithError(std::format("Backend {} not available", to_string(backend)));
+  if (!engine || !B::is_available()) {
+    state.SkipWithError(std::format("Backend {} not available", B::name()));
     return;
   }
 
@@ -39,32 +39,32 @@ void BM_Mandelbrot(benchmark::State& state) {
   ->UseRealTime()
 
 #define MANDEL_BENCH(BACKEND)                                                  \
-  BENCHMARK(BM_Mandelbrot<Backend::BACKEND>)->Name(#BACKEND) COMMON_ARGS;
+  BENCHMARK(BM_Mandelbrot<backend::BACKEND>)->Name(backend::BACKEND::name().data()) COMMON_ARGS;
 
-MANDEL_BENCH(Serial)
+MANDEL_BENCH(serial)
 
 #if defined(MANDELBROT_HAS_OMP)
-MANDEL_BENCH(OMP)
+MANDEL_BENCH(omp)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX2)
-MANDEL_BENCH(AVX2)
+MANDEL_BENCH(avx2)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX2) && defined(MANDELBROT_HAS_OMP)
-MANDEL_BENCH(AVX2_OMP)
+MANDEL_BENCH(avx2_omp)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX512)
-MANDEL_BENCH(AVX512)
+MANDEL_BENCH(avx512)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX512) && defined(MANDELBROT_HAS_OMP)
-MANDEL_BENCH(AVX512_OMP)
+MANDEL_BENCH(avx512_omp)
 #endif
 
 #if defined(MANDELBROT_HAS_CUDA)
-MANDEL_BENCH(CUDA)
+MANDEL_BENCH(cuda)
 #endif
 
 BENCHMARK_MAIN();

@@ -94,7 +94,7 @@ Then, you can include the header and use the library as shown below:
 #include <mandelbrot/mandelbrot_engine.hpp>
 
 int main() {
-  auto engine = create_engine<Backend::Serial>(1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000);
+  auto engine = create_engine<backend::serial>(1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000);
   MandelbrotResult result = engine->compute();
   
   // Print the iteration count for each pixel.
@@ -109,17 +109,17 @@ int main() {
 
 This example uses the serial implementation to generate the Mandelbrot set for a 1920x1080 image. The complex plane is bounded by [-2.0, 1.0] for the real axis and [-1.0, 1.0] for the imaginary axis, with a maximum of 1000 iterations per pixel.
 
-The engine has several backends that it can be templated on.
+The engine has several backends.
 
 **Backends** | **Description** |
 --- | --- |
-`Serial` | Default when a template parameter is not given. |
-`OMP` | OpenMP parallelization |
-`AVX2` | AVX2 vectorization |
-`AVX2_OMP` | AVX2 vectorization with OpenMP parallelization
-`AVX512` | AVX512 vectorization |
-`AVX512_OMP` | AVX512 vectorization with OpenMP parallelization|
-`CUDA` | CUDA acceleration |
+`serial` | Default when a template parameter is not given. |
+`omp` | OpenMP parallelization |
+`avx2` | AVX2 vectorization |
+`avx2_omp` | AVX2 vectorization with OpenMP parallelization
+`avx512` | AVX512 vectorization |
+`avx512_omp` | AVX512 vectorization with OpenMP parallelization|
+`cuda` | CUDA acceleration |
 
 The available backends depend on compiler configuration while building. Runtime checks are performed for backends that depend on specific hardware capabilities.
 

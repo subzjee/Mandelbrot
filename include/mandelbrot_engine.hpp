@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <format>
 #include <memory>
 
 #if defined(MANDELBROT_HAS_CUDA)
@@ -19,12 +20,12 @@ struct ViewBounds {
   float imag_min, imag_max;
 };
 
-template <Backend backend> struct DeviceResources {
+template <Backend B> struct DeviceResources {
   explicit DeviceResources(std::size_t) {};
 };
 
 #if defined(MANDELBROT_HAS_CUDA)
-template <> struct DeviceResources<Backend::CUDA> {
+template <> struct DeviceResources<backend::cuda> {
   explicit DeviceResources(std::size_t size) {
     cudaMalloc(&iterations, size * sizeof(unsigned int));
     cudaMalloc(&z_reals, size * sizeof(float));
@@ -65,14 +66,14 @@ template <> struct DeviceResources<Backend::CUDA> {
 };
 #endif
 
-template <Backend backend> class MandelbrotEngine {
+template <Backend B> class MandelbrotEngine {
 public:
   MandelbrotEngine(std::size_t width, std::size_t height,
                    const ViewBounds& bounds, unsigned int max_iterations)
       : m_width{width}, m_height{height}, m_bounds{bounds},
         m_max_iterations{max_iterations}, m_device{width * height} {
-    if (!is_available(backend)) {
-      throw std::runtime_error(to_string(backend) + " backend is not available.");
+    if (!B::is_available()) {
+      throw std::runtime_error(std::format("{} backend is not available.", B::name()));
     }
 
     m_iterations = std::make_shared<unsigned int[]>(width * height);
@@ -81,7 +82,6 @@ public:
   };
 
   MandelbrotResult compute();
-  Backend get_backend() const { return backend; }
 
   void set_bounds(const ViewBounds& bounds) { m_bounds = bounds; }
 
@@ -105,7 +105,7 @@ private:
   std::shared_ptr<float[]> m_z_reals;
   std::shared_ptr<float[]> m_z_imags;
 
-  [[no_unique_address]] DeviceResources<backend> m_device;
+  [[no_unique_address]] DeviceResources<B> m_device;
 };
 
 /*
@@ -119,10 +119,10 @@ private:
  *
  * @returns The engine.
  */
-template <Backend backend = Backend::Serial>
-std::unique_ptr<MandelbrotEngine<backend>>
+template <Backend B = backend::serial>
+std::unique_ptr<MandelbrotEngine<B>>
 create_engine(const std::size_t width, const std::size_t height,
               const ViewBounds& bounds, const unsigned int max_iterations) {
-  return std::make_unique<MandelbrotEngine<backend>>(width, height, bounds,
+  return std::make_unique<MandelbrotEngine<B>>(width, height, bounds,
                                                      max_iterations);
 }
