@@ -41,30 +41,30 @@ void BM_Mandelbrot(benchmark::State& state) {
 #define MANDEL_BENCH(BACKEND)                                                  \
   BENCHMARK(BM_Mandelbrot<backend::BACKEND>)->Name(backend::BACKEND::name().data()) COMMON_ARGS;
 
-MANDEL_BENCH(serial)
+MANDEL_BENCH(Serial)
 
 #if defined(MANDELBROT_HAS_OMP)
-MANDEL_BENCH(omp)
+MANDEL_BENCH(OMP)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX2)
-MANDEL_BENCH(avx2)
+MANDEL_BENCH(AVX2)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX2) && defined(MANDELBROT_HAS_OMP)
-MANDEL_BENCH(avx2_omp)
+MANDEL_BENCH(AVX2OMP)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX512)
-MANDEL_BENCH(avx512)
+MANDEL_BENCH(AVX512)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX512) && defined(MANDELBROT_HAS_OMP)
-MANDEL_BENCH(avx512_omp)
+MANDEL_BENCH(AVX512OMP)
 #endif
 
 #if defined(MANDELBROT_HAS_CUDA)
-MANDEL_BENCH(cuda)
+MANDEL_BENCH(CUDA)
 #endif
 
 BENCHMARK_MAIN();

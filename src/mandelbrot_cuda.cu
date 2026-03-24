@@ -57,7 +57,7 @@ __global__ void mandelbrot_cuda_kernel(
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template<>
-MandelbrotResult MandelbrotEngine<backend::cuda>::compute() {
+MandelbrotResult MandelbrotEngine<backend::CUDA>::compute() {
   dim3 block_size(16, 16);
   dim3 grid_size((m_width + block_size.x + 1) / block_size.x,
                  (m_height + block_size.y + 1) / block_size.y);

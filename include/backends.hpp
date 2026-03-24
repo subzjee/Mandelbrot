@@ -7,16 +7,16 @@
 #endif
 
 namespace backend {
-struct tag {};
+struct Backend {};
 
-struct serial : tag {
+struct Serial : Backend {
   static constexpr std::string_view name() { return "Serial"; }
 
   static bool is_available() { return true; }
 };
 
 #if defined(MANDELBROT_HAS_OMP)
-struct omp : tag {
+struct OMP : Backend {
   static constexpr std::string_view name() { return "OMP"; }
 
   static bool is_available() { return true; }
@@ -24,7 +24,7 @@ struct omp : tag {
 #endif
 
 #if defined(MANDELBROT_HAS_AVX2)
-struct avx2 : tag {
+struct AVX2 : Backend {
   static constexpr std::string_view name() { return "AVX2"; }
 
   static bool is_available() { return __builtin_cpu_supports("avx2"); }
@@ -34,14 +34,14 @@ struct avx2 : tag {
 };
 
 #if defined(MANDELBROT_HAS_OMP)
-struct avx2_omp : avx2 {
+struct AVX2OMP : AVX2 {
   static constexpr std::string_view name() { return "AVX2_OMP"; }
 };
 #endif
 #endif
 
 #if defined(MANDELBROT_HAS_AVX512)
-struct avx512 : tag {
+struct AVX512 : Backend {
   static constexpr std::string_view name() { return "AVX512"; }
 
   static bool is_available() { return __builtin_cpu_supports("avx512f"); }
@@ -51,14 +51,14 @@ struct avx512 : tag {
 };
 
 #if defined(MANDELBROT_HAS_OMP)
-struct avx512_omp : avx512 {
+struct AVX512OMP : AVX512 {
   static constexpr std::string_view name() { return "AVX512_OMP"; }
 };
 #endif
 #endif
 
 #if defined(MANDELBROT_HAS_CUDA)
-struct cuda : tag {
+struct CUDA : Backend {
   static constexpr std::string_view name() { return "CUDA"; }
 
   static bool is_available() {
@@ -72,4 +72,4 @@ struct cuda : tag {
 } // namespace backend
 
 template <typename T>
-concept Backend = std::is_base_of_v<backend::tag, T>;
+concept Backend = std::is_base_of_v<backend::Backend, T>;

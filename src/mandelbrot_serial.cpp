@@ -12,7 +12,7 @@
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-template <> MandelbrotResult MandelbrotEngine<backend::serial>::compute() {
+template <> MandelbrotResult MandelbrotEngine<backend::Serial>::compute() {
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; ++col) {
       std::complex<float> z{0.0f, 0.0f};

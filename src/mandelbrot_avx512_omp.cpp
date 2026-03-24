@@ -2,6 +2,7 @@
  * This file contains the AVX512 + OpenMP implementation.
  */
 
+#include "backends.hpp"
 #if defined(MANDELBROT_HAS_AVX512) && defined(MANDELBROT_HAS_OMP)
 
 #include <immintrin.h>
@@ -14,9 +15,9 @@
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-template <> MandelbrotResult MandelbrotEngine<backend::avx512_omp>::compute() {
+template <> MandelbrotResult MandelbrotEngine<backend::AVX512OMP>::compute() {
   constexpr std::size_t lanes =
-      backend::avx512::simd_width_bytes / sizeof(float);
+      backend::AVX512::simd_width_bytes / sizeof(float);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < m_height; ++row) {

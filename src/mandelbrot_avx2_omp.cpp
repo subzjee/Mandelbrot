@@ -14,8 +14,8 @@
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-template <> MandelbrotResult MandelbrotEngine<backend::avx2_omp>::compute() {
-  constexpr std::size_t lanes = backend::avx2::simd_width_bytes / sizeof(float);
+template <> MandelbrotResult MandelbrotEngine<backend::AVX2OMP>::compute() {
+  constexpr std::size_t lanes = backend::AVX2::simd_width_bytes / sizeof(float);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < m_height; ++row) {
@@ -75,9 +75,9 @@ template <> MandelbrotResult MandelbrotEngine<backend::avx2_omp>::compute() {
       } else {
         // AVX2 doesn't have masked stores so we have to manually copy the
         // remaining elements if it doesn't fit perfectly in a lane.
-        alignas(backend::avx2::simd_width_bytes) int lane_iters[lanes];
-        alignas(backend::avx2::simd_width_bytes) float lane_real[lanes];
-        alignas(backend::avx2::simd_width_bytes) float lane_imag[lanes];
+        alignas(backend::AVX2::simd_width_bytes) int lane_iters[lanes];
+        alignas(backend::AVX2::simd_width_bytes) float lane_real[lanes];
+        alignas(backend::AVX2::simd_width_bytes) float lane_imag[lanes];
 
         _mm256_store_si256(reinterpret_cast<__m256i*>(lane_iters), iter_counts);
         _mm256_store_ps(lane_real, z_real);

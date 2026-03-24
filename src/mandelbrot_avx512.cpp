@@ -14,9 +14,9 @@
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-template <> MandelbrotResult MandelbrotEngine<backend::avx512>::compute() {
+template <> MandelbrotResult MandelbrotEngine<backend::AVX512>::compute() {
   constexpr std::size_t lanes =
-      backend::avx512::simd_width_bytes / sizeof(float);
+      backend::AVX512::simd_width_bytes / sizeof(float);
 
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; col += lanes) {

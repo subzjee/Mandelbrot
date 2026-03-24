@@ -113,13 +113,13 @@ The engine has several backends.
 
 **Backends** | **Description** |
 --- | --- |
-`serial` | Default when a template parameter is not given. |
-`omp` | OpenMP parallelization |
-`avx2` | AVX2 vectorization |
-`avx2_omp` | AVX2 vectorization with OpenMP parallelization
-`avx512` | AVX512 vectorization |
-`avx512_omp` | AVX512 vectorization with OpenMP parallelization|
-`cuda` | CUDA acceleration |
+`Serial` | Default when a template parameter is not given. |
+`OMP` | OpenMP parallelization |
+`AVX2` | AVX2 vectorization |
+`AVX2OMP` | AVX2 vectorization with OpenMP parallelization
+`AVX512` | AVX512 vectorization |
+`AVX512OMP` | AVX512 vectorization with OpenMP parallelization|
+`CUDA` | CUDA acceleration |
 
 The available backends depend on compiler configuration while building. Runtime checks are performed for backends that depend on specific hardware capabilities.
 

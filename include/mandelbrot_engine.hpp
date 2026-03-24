@@ -25,7 +25,7 @@ template <Backend B> struct DeviceResources {
 };
 
 #if defined(MANDELBROT_HAS_CUDA)
-template <> struct DeviceResources<backend::cuda> {
+template <> struct DeviceResources<backend::CUDA> {
   explicit DeviceResources(std::size_t size) {
     cudaMalloc(&iterations, size * sizeof(unsigned int));
     cudaMalloc(&z_reals, size * sizeof(float));
@@ -120,7 +120,7 @@ private:
  *
  * @returns The engine.
  */
-template <Backend B = backend::serial>
+template <Backend B = backend::Serial>
 std::unique_ptr<MandelbrotEngine<B>>
 create_engine(const std::size_t width, const std::size_t height,
               const ViewBounds& bounds, const unsigned int max_iterations) {
