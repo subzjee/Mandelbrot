@@ -6,6 +6,7 @@
 
 #include <immintrin.h>
 
+#include "backends.hpp"
 #include "mandelbrot_engine.hpp"
 #include "utility.hpp"
 
@@ -14,7 +15,8 @@
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-template <> MandelbrotResult MandelbrotEngine<backend::AVX2OMP>::compute() {
+template <>
+MandelbrotResult MandelbrotEngine<backend::AVX2, exec::OMP>::compute() {
   constexpr std::size_t lanes = backend::AVX2::simd_width_bytes / sizeof(float);
 
 #pragma omp parallel for collapse(2) schedule(guided)

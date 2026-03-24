@@ -8,25 +8,26 @@
 
 #include "benchmark/benchmark.h"
 
+#include "backends.hpp"
 #include "mandelbrot_engine.hpp"
 
 const ViewBounds bounds{-2.0f, 1.0f, -1.0f, 1.0f};
 constexpr unsigned int max_iter = 1000;
 
-template <Backend B>
+template <Backend B, Execution Exec>
 void BM_Mandelbrot(benchmark::State& state) {
   const std::size_t width = static_cast<std::size_t>(state.range(0));
   const std::size_t height = static_cast<std::size_t>(state.range(1));
 
-  auto engine = create_engine<B>(width, height, bounds, max_iter);
+  auto engine = MandelbrotEngine<B, Exec>{width, height, bounds, max_iter};
 
-  if (!engine || !B::is_available()) {
+  if (!B::is_available()) {
     state.SkipWithError(std::format("Backend {} not available", B::name()));
     return;
   }
 
   for (auto _ : state) {
-    auto result = engine->compute();
+    auto result = engine.compute();
   }
 }
 
@@ -38,33 +39,33 @@ void BM_Mandelbrot(benchmark::State& state) {
   ->Args({3840, 2160})                                                     \
   ->UseRealTime()
 
-#define MANDEL_BENCH(BACKEND)                                                  \
-  BENCHMARK(BM_Mandelbrot<backend::BACKEND>)->Name(backend::BACKEND::name().data()) COMMON_ARGS;
+#define MANDEL_BENCH(BACKEND, EXEC)                                                  \
+  BENCHMARK(BM_Mandelbrot<backend::BACKEND, exec::EXEC>)->Name(std::format("{}{}", backend::BACKEND::name(), exec::EXEC::name())) COMMON_ARGS;
 
-MANDEL_BENCH(Serial)
+MANDEL_BENCH(Serial, Default)
 
 #if defined(MANDELBROT_HAS_OMP)
-MANDEL_BENCH(OMP)
+MANDEL_BENCH(Serial, OMP)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX2)
-MANDEL_BENCH(AVX2)
+MANDEL_BENCH(AVX2, Default)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX2) && defined(MANDELBROT_HAS_OMP)
-MANDEL_BENCH(AVX2OMP)
+MANDEL_BENCH(AVX2, OMP)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX512)
-MANDEL_BENCH(AVX512)
+MANDEL_BENCH(AVX512, Default)
 #endif
 
 #if defined(MANDELBROT_HAS_AVX512) && defined(MANDELBROT_HAS_OMP)
-MANDEL_BENCH(AVX512OMP)
+MANDEL_BENCH(AVX512, OMP)
 #endif
 
 #if defined(MANDELBROT_HAS_CUDA)
-MANDEL_BENCH(CUDA)
+MANDEL_BENCH(CUDA, Default)
 #endif
 
 BENCHMARK_MAIN();

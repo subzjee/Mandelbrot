@@ -6,6 +6,7 @@
 
 #include <immintrin.h>
 
+#include "backends.hpp"
 #include "mandelbrot_engine.hpp"
 #include "utility.hpp"
 

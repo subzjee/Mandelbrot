@@ -94,7 +94,7 @@ Then, you can include the header and use the library as shown below:
 #include <mandelbrot/mandelbrot_engine.hpp>
 
 int main() {
-  auto engine = create_engine<backend::serial>(1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000);
+  auto engine = MandelbrotEngine<backend::Serial, exec::Default>{1920, 1080, {-2.0f, 1.0f, -1.0f, 1.0f}, 1000};
   MandelbrotResult result = engine->compute();
   
   // Print the iteration count for each pixel.
@@ -107,21 +107,23 @@ int main() {
 }
 ```
 
-This example uses the serial implementation to generate the Mandelbrot set for a 1920x1080 image. The complex plane is bounded by [-2.0, 1.0] for the real axis and [-1.0, 1.0] for the imaginary axis, with a maximum of 1000 iterations per pixel.
+This example uses the serial implementation with the default execution policy to generate the Mandelbrot set for a 1920x1080 image. The complex plane is bounded by [-2.0, 1.0] for the real axis and [-1.0, 1.0] for the imaginary axis, with a maximum of 1000 iterations per pixel.
 
-The engine has several backends.
+The engine has several backends and execution policies.
 
-**Backends** | **Description** |
+**Backend** | **Description** |
 --- | --- |
-`Serial` | Default when a template parameter is not given. |
-`OMP` | OpenMP parallelization |
+`Serial` | No vectorization (Default) |
 `AVX2` | AVX2 vectorization |
-`AVX2OMP` | AVX2 vectorization with OpenMP parallelization
 `AVX512` | AVX512 vectorization |
-`AVX512OMP` | AVX512 vectorization with OpenMP parallelization|
 `CUDA` | CUDA acceleration |
 
-The available backends depend on compiler configuration while building. Runtime checks are performed for backends that depend on specific hardware capabilities.
+**Execution Policy** | **Description** |
+--- | --- |
+`Default` | No parallelization |
+`OMP` | OpenMP parallelization |
+
+The available backends and execution policies depend on compiler configuration while building. Runtime checks are performed for backends that depend on specific hardware capabilities.
 
 ### Examples
 For more examples, check out the `examples` directory.

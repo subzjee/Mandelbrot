@@ -66,7 +66,9 @@ template <> struct DeviceResources<backend::CUDA> {
 };
 #endif
 
-template <Backend B> class MandelbrotEngine {
+template <Backend B = backend::Serial, Execution Exec = exec::Default>
+  requires Compatible<B, Exec>
+class MandelbrotEngine {
 public:
   MandelbrotEngine(std::size_t width, std::size_t height,
                    const ViewBounds& bounds, unsigned int max_iterations)
@@ -108,22 +110,3 @@ private:
 
   [[no_unique_address]] DeviceResources<B> m_device;
 };
-
-/*
- * Create an engine for the specified backend.
- *
- * @tparam backend The backend to use.
- * @param width The width of the image.
- * @param height The height of the image.
- * @param bounds The view bounds (real and imaginary axis limits).
- * @param max_iterations The maximum iterations per pixel.
- *
- * @returns The engine.
- */
-template <Backend B = backend::Serial>
-std::unique_ptr<MandelbrotEngine<B>>
-create_engine(const std::size_t width, const std::size_t height,
-              const ViewBounds& bounds, const unsigned int max_iterations) {
-  return std::make_unique<MandelbrotEngine<B>>(width, height, bounds,
-                                               max_iterations);
-}

@@ -4,6 +4,7 @@
 
 #include <complex>
 
+#include "backends.hpp"
 #include "mandelbrot_engine.hpp"
 #include "utility.hpp"
 

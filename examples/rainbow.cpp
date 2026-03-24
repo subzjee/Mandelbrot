@@ -28,13 +28,12 @@ constexpr float
 int main() {
   cv::Mat pixels(height * ssaa_factor, width * ssaa_factor, CV_8UC3);
 
-  auto engine = create_engine(width * ssaa_factor, height * ssaa_factor, {real_min, real_max, imag_min, imag_max}, max_iterations);
-
-  MandelbrotResult iterations = engine->compute();
+  auto engine = MandelbrotEngine{width * ssaa_factor, height * ssaa_factor, {real_min, real_max, imag_min, imag_max}, max_iterations};
+  MandelbrotResult result = engine.compute();
 
   for (std::size_t row = 0; row < pixels.rows; ++row) {
     for (std::size_t col = 0; col < pixels.cols; ++col) {
-      auto&& [iteration, z] = iterations(row, col);
+      auto&& [iteration, z] = result(row, col);
 
       if (iteration == max_iterations) {
         pixels.at<cv::Vec3b>(row, col) = cv::Vec3b(0, 0, 0);

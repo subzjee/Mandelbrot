@@ -6,6 +6,7 @@
 
 #include <complex>
 
+#include "backends.hpp"
 #include "mandelbrot_engine.hpp"
 #include "utility.hpp"
 
@@ -14,7 +15,8 @@
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-template <> MandelbrotResult MandelbrotEngine<backend::OMP>::compute() {
+template <>
+MandelbrotResult MandelbrotEngine<backend::Serial, exec::OMP>::compute() {
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; ++col) {

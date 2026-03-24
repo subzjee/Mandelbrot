@@ -5,6 +5,7 @@
 #include <cuda/std/complex>
 #include <cuda_runtime.h>
 
+#include "backends.hpp"
 #include "mandelbrot_engine.hpp"
 
 /*
