@@ -16,7 +16,8 @@
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template <>
-MandelbrotResult MandelbrotEngine<backend::Serial, exec::OMP>::compute() {
+MandelbrotResult<backend::Serial>
+MandelbrotEngine<backend::Serial, exec::OMP>::compute() {
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; ++col) {
@@ -34,13 +35,13 @@ MandelbrotResult MandelbrotEngine<backend::Serial, exec::OMP>::compute() {
 
       const std::size_t idx = row * m_width + col;
 
-      m_iterations[idx] = iteration;
-      m_z_reals[idx] = z.real();
-      m_z_imags[idx] = z.imag();
+      m_host.iterations[idx] = iteration;
+      m_host.z_reals[idx] = z.real();
+      m_host.z_imags[idx] = z.imag();
     }
   }
 
-  return {m_iterations, m_z_reals, m_z_imags, m_width, m_height};
+  return {m_host, m_width, m_height};
 }
 
 #endif

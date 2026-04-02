@@ -9,6 +9,7 @@
 #include "benchmark/benchmark.h"
 
 #include "backends.hpp"
+#include "benchmark/utils.h"
 #include "mandelbrot_engine.hpp"
 
 const ViewBounds bounds{-2.0f, 1.0f, -1.0f, 1.0f};
@@ -42,7 +43,7 @@ void BM_Mandelbrot(benchmark::State& state) {
 #define MANDEL_BENCH(BACKEND, EXEC)                                                  \
   BENCHMARK(BM_Mandelbrot<backend::BACKEND, exec::EXEC>)->Name(std::format("{}{}", backend::BACKEND::name(), exec::EXEC::name())) COMMON_ARGS;
 
-MANDEL_BENCH(Serial, Default)
+// MANDEL_BENCH(Serial, Default)
 
 #if defined(MANDELBROT_HAS_OMP)
 MANDEL_BENCH(Serial, OMP)

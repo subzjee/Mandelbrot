@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <string_view>
 
 #if defined(MANDELBROT_HAS_CUDA)
@@ -24,7 +25,9 @@ template <typename T>
 concept Execution = std::is_base_of_v<exec::ExecBase, T>;
 
 namespace backend {
-struct BackendBase {};
+struct BackendBase {
+  static const std::size_t alignment = alignof(std::max_align_t);
+};
 
 struct Serial : BackendBase {
   /*
@@ -85,7 +88,7 @@ struct AVX2 : BackendBase {
   }
 
   static constexpr unsigned int simd_width = 256; // The SIMD width in bits.
-  static constexpr unsigned int simd_width_bytes = simd_width / 8;
+  static constexpr unsigned int alignment = simd_width / 8;
 };
 #endif
 
@@ -118,7 +121,7 @@ struct AVX512 : BackendBase {
   }
 
   static constexpr unsigned int simd_width = 512; // The SIMD width in bits.
-  static constexpr unsigned int simd_width_bytes = simd_width / 8;
+  static constexpr unsigned int alignment = simd_width / 8;
 };
 #endif
 

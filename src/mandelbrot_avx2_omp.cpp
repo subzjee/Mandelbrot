@@ -16,8 +16,9 @@
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
 template <>
-MandelbrotResult MandelbrotEngine<backend::AVX2, exec::OMP>::compute() {
-  constexpr std::size_t lanes = backend::AVX2::simd_width_bytes / sizeof(float);
+MandelbrotResult<backend::AVX2>
+MandelbrotEngine<backend::AVX2, exec::OMP>::compute() {
+  constexpr std::size_t lanes = backend::AVX2::alignment / sizeof(float);
 
 #pragma omp parallel for collapse(2) schedule(guided)
   for (std::size_t row = 0; row < m_height; ++row) {
@@ -70,31 +71,33 @@ MandelbrotResult MandelbrotEngine<backend::AVX2, exec::OMP>::compute() {
       const std::size_t remaining = std::min(lanes, m_width - col);
 
       if (remaining == lanes) {
-        _mm256_storeu_si256(reinterpret_cast<__m256i*>(&m_iterations[base_idx]),
-                            iter_counts);
-        _mm256_storeu_ps(&m_z_reals[base_idx], z_real);
-        _mm256_storeu_ps(&m_z_imags[base_idx], z_imag);
+        _mm256_store_si256(
+            reinterpret_cast<__m256i*>(&m_host.iterations[base_idx]),
+            iter_counts);
+        _mm256_store_ps(&m_host.z_reals[base_idx], z_real);
+        _mm256_store_ps(&m_host.z_imags[base_idx], z_imag);
       } else {
         // AVX2 doesn't have masked stores so we have to manually copy the
         // remaining elements if it doesn't fit perfectly in a lane.
-        alignas(backend::AVX2::simd_width_bytes) int lane_iters[lanes];
-        alignas(backend::AVX2::simd_width_bytes) float lane_real[lanes];
-        alignas(backend::AVX2::simd_width_bytes) float lane_imag[lanes];
+        alignas(backend::AVX2::alignment) int lane_iters[lanes];
+        alignas(backend::AVX2::alignment) float lane_real[lanes];
+        alignas(backend::AVX2::alignment) float lane_imag[lanes];
 
         _mm256_store_si256(reinterpret_cast<__m256i*>(lane_iters), iter_counts);
         _mm256_store_ps(lane_real, z_real);
         _mm256_store_ps(lane_imag, z_imag);
 
         for (std::size_t i = 0; i < std::min(lanes, m_width - col); ++i) {
-          m_iterations[base_idx + i] = static_cast<unsigned int>(lane_iters[i]);
-          m_z_reals[base_idx + i] = lane_real[i];
-          m_z_imags[base_idx + i] = lane_imag[i];
+          m_host.iterations[base_idx + i] =
+              static_cast<unsigned int>(lane_iters[i]);
+          m_host.z_reals[base_idx + i] = lane_real[i];
+          m_host.z_imags[base_idx + i] = lane_imag[i];
         }
       }
     }
   }
 
-  return {m_iterations, m_z_reals, m_z_imags, m_width, m_height};
+  return {m_host, m_width, m_height};
 }
 
 #endif

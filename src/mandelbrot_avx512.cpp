@@ -15,9 +15,9 @@
  *
  * @returns MandelbrotResult containing iteration and final z-value per pixel.
  */
-template <> MandelbrotResult MandelbrotEngine<backend::AVX512>::compute() {
-  constexpr std::size_t lanes =
-      backend::AVX512::simd_width_bytes / sizeof(float);
+template <>
+MandelbrotResult<backend::AVX512> MandelbrotEngine<backend::AVX512>::compute() {
+  constexpr std::size_t lanes = backend::AVX512::alignment / sizeof(float);
 
   for (std::size_t row = 0; row < m_height; ++row) {
     for (std::size_t col = 0; col < m_width; col += lanes) {
@@ -67,14 +67,14 @@ template <> MandelbrotResult MandelbrotEngine<backend::AVX512>::compute() {
       const __mmask16 store_mask =
           (remaining == lanes) ? 0xFFFF : (1 << remaining) - 1;
 
-      _mm512_mask_storeu_ps(&m_z_reals[base_idx], store_mask, z_real);
-      _mm512_mask_storeu_ps(&m_z_imags[base_idx], store_mask, z_imag);
-      _mm512_mask_storeu_epi32(&m_iterations[base_idx], store_mask,
-                               iter_counts);
+      _mm512_mask_store_ps(&m_host.z_reals[base_idx], store_mask, z_real);
+      _mm512_mask_store_ps(&m_host.z_imags[base_idx], store_mask, z_imag);
+      _mm512_mask_store_epi32(&m_host.iterations[base_idx], store_mask,
+                              iter_counts);
     }
   }
 
-  return {m_iterations, m_z_reals, m_z_imags, m_width, m_height};
+  return {m_host, m_width, m_height};
 }
 
 #endif
