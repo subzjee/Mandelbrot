@@ -1,11 +1,9 @@
 #pragma once
 
-#include <vector>
-
 #include "backends.hpp"
 #include "utility.hpp"
 
-using utility::AlignedAllocator;
+using utility::AlignedVector;
 
 template <Backend B> struct HostResources {
   explicit HostResources(std::size_t n) : iterations{}, z_reals{}, z_imags{} {
@@ -14,10 +12,9 @@ template <Backend B> struct HostResources {
     z_imags.reserve(n);
   };
 
-  std::vector<unsigned int, AlignedAllocator<unsigned int, B::alignment>>
-      iterations;
-  std::vector<float, AlignedAllocator<float, B::alignment>> z_reals;
-  std::vector<float, AlignedAllocator<float, B::alignment>> z_imags;
+  AlignedVector<unsigned int, B::alignment> iterations;
+  AlignedVector<float, B::alignment> z_reals;
+  AlignedVector<float, B::alignment> z_imags;
 };
 
 template <Backend B> struct DeviceResources {
