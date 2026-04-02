@@ -5,10 +5,49 @@
 #pragma once
 
 #include <complex>
+#include <stdlib.h>
+#include <vector>
 
 #include <immintrin.h>
 
 namespace utility {
+template <typename T, std::size_t Alignment> struct AlignedAllocator {
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
+
+  AlignedAllocator() noexcept = default;
+
+  template <typename U>
+  AlignedAllocator(const AlignedAllocator<U, Alignment>&) noexcept {};
+
+  bool operator==(const AlignedAllocator&) const noexcept { return true; }
+  bool operator!=(const AlignedAllocator&) const noexcept { return false; }
+
+  [[nodiscard]] value_type* allocate(std::size_t n) {
+    std::size_t size = n * sizeof(T);
+
+    if (size % Alignment != 0) {
+      size += Alignment - (size % Alignment);
+    }
+
+    if (auto p = static_cast<value_type*>(aligned_alloc(Alignment, size))) {
+      return p;
+    }
+
+    throw std::bad_alloc();
+  };
+
+  void deallocate(value_type* p, std::size_t) noexcept { std::free(p); }
+
+  template <typename U> struct rebind {
+    using other = AlignedAllocator<U, Alignment>;
+  };
+};
+
+template <typename T, std::size_t Alignment>
+using AlignedVector = std::vector<T, AlignedAllocator<T, Alignment>>;
+
 /*
  * Map an index in a 1D structure to a bounded axis linearly.
  *
